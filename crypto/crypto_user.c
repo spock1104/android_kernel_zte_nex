@@ -75,7 +75,7 @@ static int crypto_report_cipher(struct sk_buff *skb, struct crypto_alg *alg)
 {
 	struct crypto_report_cipher rcipher;
 
-	snprintf(rcipher.type, CRYPTO_MAX_ALG_NAME, "%s", "cipher");
+	strncpy(rcipher.type, "cipher", sizeof(rcipher.type));
 
 	rcipher.blocksize = alg->cra_blocksize;
 	rcipher.min_keysize = alg->cra_cipher.cia_min_keysize;
@@ -94,8 +94,7 @@ static int crypto_report_comp(struct sk_buff *skb, struct crypto_alg *alg)
 {
 	struct crypto_report_comp rcomp;
 
-	snprintf(rcomp.type, CRYPTO_MAX_ALG_NAME, "%s", "compression");
-
+	strncpy(rcomp.type, "compression", sizeof(rcomp.type));
 	nla_put(skb, CRYPTOCFGA_REPORT_COMPRESS,
 		sizeof(struct crypto_report_comp), &rcomp);
 
@@ -108,12 +107,14 @@ nla_put_failure:
 static int crypto_report_one(struct crypto_alg *alg,
 			     struct crypto_user_alg *ualg, struct sk_buff *skb)
 {
-	memcpy(&ualg->cru_name, &alg->cra_name, sizeof(ualg->cru_name));
-	memcpy(&ualg->cru_driver_name, &alg->cra_driver_name,
-	       sizeof(ualg->cru_driver_name));
-	memcpy(&ualg->cru_module_name, module_name(alg->cra_module),
-	       CRYPTO_MAX_ALG_NAME);
+	strncpy(ualg->cru_name, alg->cra_name, sizeof(ualg->cru_name));
+	strncpy(ualg->cru_driver_name, alg->cra_driver_name,
+		sizeof(ualg->cru_driver_name));
+	strncpy(ualg->cru_module_name, module_name(alg->cra_module),
+		sizeof(ualg->cru_module_name));
 
+	ualg->cru_type = 0;
+	ualg->cru_mask = 0;
 	ualg->cru_flags = alg->cra_flags;
 	ualg->cru_refcnt = atomic_read(&alg->cra_refcnt);
 
@@ -122,9 +123,14 @@ static int crypto_report_one(struct crypto_alg *alg,
 	if (alg->cra_flags & CRYPTO_ALG_LARVAL) {
 		struct crypto_report_larval rl;
 
+<<<<<<< HEAD
 		snprintf(rl.type, CRYPTO_MAX_ALG_NAME, "%s", "larval");
 
 		nla_put(skb, CRYPTOCFGA_REPORT_LARVAL,
+=======
+		strncpy(rl.type, "larval", sizeof(rl.type));
+		NLA_PUT(skb, CRYPTOCFGA_REPORT_LARVAL,
+>>>>>>> e8adb76... Patch 3.4.30 --> 3.4.40 using patch -p1 <
 			sizeof(struct crypto_report_larval), &rl);
 
 		goto out;
