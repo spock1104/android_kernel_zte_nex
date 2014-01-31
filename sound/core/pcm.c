@@ -49,6 +49,8 @@ static struct snd_pcm *snd_pcm_get(struct snd_card *card, int device)
 	struct snd_pcm *pcm;
 
 	list_for_each_entry(pcm, &snd_pcm_devices, list) {
+		if (pcm->internal)
+			continue;
 		if (pcm->card == card && pcm->device == device)
 			return pcm;
 	}
@@ -60,6 +62,8 @@ static int snd_pcm_next(struct snd_card *card, int device)
 	struct snd_pcm *pcm;
 
 	list_for_each_entry(pcm, &snd_pcm_devices, list) {
+		if (pcm->internal)
+			continue;
 		if (pcm->card == card && pcm->device > device)
 			return pcm->device;
 		else if (pcm->card->number > card->number)
@@ -713,9 +717,9 @@ EXPORT_SYMBOL(snd_pcm_new_stream);
  *
  * Returns zero if successful, or a negative error code on failure.
  */
-int snd_pcm_new(struct snd_card *card, const char *id, int device,
-		int playback_count, int capture_count,
-	        struct snd_pcm ** rpcm)
+static int _snd_pcm_new(struct snd_card *card, const char *id, int device,
+		int playback_count, int capture_count, bool internal,
+		struct snd_pcm **rpcm)
 {
 	struct snd_pcm *pcm;
 	int err;
@@ -736,6 +740,10 @@ int snd_pcm_new(struct snd_card *card, const char *id, int device,
 	}
 	pcm->card = card;
 	pcm->device = device;
+<<<<<<< HEAD
+=======
+	pcm->internal = internal;
+>>>>>>> 4d5c8c4... Patch 3.4.60 --> 3.4.70 using patch -p1 <
 
 	if (id)
 		strlcpy(pcm->id, id, sizeof(pcm->id));
