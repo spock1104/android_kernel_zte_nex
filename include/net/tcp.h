@@ -260,6 +260,7 @@ extern int sysctl_tcp_thin_dupack;
 /*ZTE_LC_TCP_WIN, 20130205 start*/
 extern int sysctl_socket_rwin_init;
 /*ZTE_LC_TCP_WIN, 20130205 end*/
+extern int sysctl_tcp_challenge_ack_limit;
 
 extern atomic_long_t tcp_memory_allocated;
 extern struct percpu_counter tcp_sockets_allocated;
