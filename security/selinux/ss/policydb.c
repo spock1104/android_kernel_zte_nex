@@ -1931,6 +1931,7 @@ static int filename_trans_read(struct policydb *p, void *fp)
 #else
 		hashtab_insert(p->filename_trans, ft, otype);
 #endif
+
 	}
 	hash_eval(p->filename_trans, "filenametr");
 	return 0;
