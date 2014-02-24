@@ -139,14 +139,15 @@ static int __gpuclk_store(int max, struct device *dev,
 	unsigned long val;
 	struct kgsl_device *device = kgsl_device_from_dev(dev);
 	struct kgsl_pwrctrl *pwr;
+	unsigned int level = 0;
 
 	if (device == NULL)
 		return 0;
 	pwr = &device->pwrctrl;
 
-	ret = sscanf(buf, "%ld", &val);
-	if (ret != 1)
-		return count;
+	ret = kgsl_sysfs_store(buf, &level);
+	if (ret)
+		return ret;
 
 	mutex_lock(&device->mutex);
 	for (i = 0; i < pwr->num_pwrlevels - 1; i++) {
@@ -176,11 +177,151 @@ done:
 	return count;
 }
 
+static int kgsl_pwrctrl_thermal_pwrlevel_show(struct device *dev,
+					struct device_attribute *attr,
+					char *buf)
+{
+
+	struct kgsl_device *device = kgsl_device_from_dev(dev);
+	struct kgsl_pwrctrl *pwr;
+	if (device == NULL)
+		return 0;
+	pwr = &device->pwrctrl;
+	return snprintf(buf, PAGE_SIZE, "%d\n", pwr->thermal_pwrlevel);
+}
+
+static int kgsl_pwrctrl_max_pwrlevel_store(struct device *dev,
+					 struct device_attribute *attr,
+					 const char *buf, size_t count)
+{
+	struct kgsl_device *device = kgsl_device_from_dev(dev);
+	struct kgsl_pwrctrl *pwr;
+	int ret, max_level;
+	unsigned int level = 0;
+
+	if (device == NULL)
+		return 0;
+
+	pwr = &device->pwrctrl;
+
+	ret = kgsl_sysfs_store(buf, &level);
+	if (ret)
+		return ret;
+
+	mutex_lock(&device->mutex);
+
+	/* You can't set a maximum power level lower than the minimum */
+	if (level > pwr->min_pwrlevel)
+		level = pwr->min_pwrlevel;
+
+	pwr->max_pwrlevel = level;
+
+
+	max_level = max_t(int, pwr->thermal_pwrlevel, pwr->max_pwrlevel);
+
+	/*
+	 * If there is no policy then move to max by default.  Otherwise only
+	 * move max if the current level happens to be higher then the new max
+	 */
+
+	if (device->pwrscale.policy == NULL ||
+		(max_level > pwr->active_pwrlevel))
+		kgsl_pwrctrl_pwrlevel_change(device, max_level);
+
+	mutex_unlock(&device->mutex);
+
+	return count;
+}
+
+static int kgsl_pwrctrl_max_pwrlevel_show(struct device *dev,
+					struct device_attribute *attr,
+					char *buf)
+{
+
+	struct kgsl_device *device = kgsl_device_from_dev(dev);
+	struct kgsl_pwrctrl *pwr;
+	if (device == NULL)
+		return 0;
+	pwr = &device->pwrctrl;
+	return snprintf(buf, PAGE_SIZE, "%d\n", pwr->max_pwrlevel);
+}
+
+static int kgsl_pwrctrl_min_pwrlevel_store(struct device *dev,
+					 struct device_attribute *attr,
+					 const char *buf, size_t count)
+{	struct kgsl_device *device = kgsl_device_from_dev(dev);
+	struct kgsl_pwrctrl *pwr;
+	int ret, min_level;
+	unsigned int level = 0;
+
+	if (device == NULL)
+		return 0;
+
+	pwr = &device->pwrctrl;
+
+	ret = kgsl_sysfs_store(buf, &level);
+	if (ret)
+		return ret;
+
+	mutex_lock(&device->mutex);
+	if (level > pwr->num_pwrlevels - 2)
+		level = pwr->num_pwrlevels - 2;
+
+	/* You can't set a minimum power level lower than the maximum */
+	if (level < pwr->max_pwrlevel)
+		level = pwr->max_pwrlevel;
+
+	pwr->min_pwrlevel = level;
+
+	min_level = max_t(int, pwr->thermal_pwrlevel, pwr->min_pwrlevel);
+
+	/* Only move the power level higher if minimum is higher then the
+	 * current level
+	 */
+
+	if (min_level < pwr->active_pwrlevel)
+		kgsl_pwrctrl_pwrlevel_change(device, min_level);
+
+	mutex_unlock(&device->mutex);
+	return count;
+}
+
 static int kgsl_pwrctrl_max_gpuclk_store(struct device *dev,
 					 struct device_attribute *attr,
 					 const char *buf, size_t count)
 {
-	return __gpuclk_store(1, dev, attr, buf, count);
+	struct kgsl_device *device = kgsl_device_from_dev(dev);
+	struct kgsl_pwrctrl *pwr;
+	unsigned int val = 0;
+	int ret, level;
+
+	if (device == NULL)
+		return 0;
+
+	pwr = &device->pwrctrl;
+
+	ret = kgsl_sysfs_store(buf, &val);
+	if (ret)
+		return ret;
+
+	mutex_lock(&device->mutex);
+	level = _get_nearest_pwrlevel(pwr, val);
+	if (level < 0)
+		goto done;
+
+	pwr->thermal_pwrlevel = level;
+
+	/*
+	 * if the thermal limit is lower than the current setting,
+	 * move the speed down immediately
+	 */
+
+	if (pwr->thermal_pwrlevel > pwr->active_pwrlevel)
+		kgsl_pwrctrl_pwrlevel_change(device, pwr->thermal_pwrlevel);
+
+done:
+	mutex_unlock(&device->mutex);
+	return count;
 }
 
 static int kgsl_pwrctrl_max_gpuclk_show(struct device *dev,
@@ -200,7 +341,27 @@ static int kgsl_pwrctrl_gpuclk_store(struct device *dev,
 				     struct device_attribute *attr,
 				     const char *buf, size_t count)
 {
-	return __gpuclk_store(0, dev, attr, buf, count);
+	struct kgsl_device *device = kgsl_device_from_dev(dev);
+	struct kgsl_pwrctrl *pwr;
+	unsigned int val = 0;
+	int ret, level;
+
+	if (device == NULL)
+		return 0;
+
+	pwr = &device->pwrctrl;
+
+	ret = kgsl_sysfs_store(buf, &val);
+	if (ret)
+		return ret;
+
+	mutex_lock(&device->mutex);
+	level = _get_nearest_pwrlevel(pwr, val);
+	if (level >= 0)
+		kgsl_pwrctrl_pwrlevel_change(device, level);
+
+	mutex_unlock(&device->mutex);
+	return count;
 }
 
 static int kgsl_pwrctrl_gpuclk_show(struct device *dev,
@@ -220,21 +381,18 @@ static int kgsl_pwrctrl_pwrnap_store(struct device *dev,
 				     struct device_attribute *attr,
 				     const char *buf, size_t count)
 {
-	char temp[20];
-	unsigned long val;
+	unsigned int val = 0;
 	struct kgsl_device *device = kgsl_device_from_dev(dev);
 	struct kgsl_pwrctrl *pwr;
-	int rc;
+	int ret;
 
 	if (device == NULL)
 		return 0;
 	pwr = &device->pwrctrl;
 
-	snprintf(temp, sizeof(temp), "%.*s",
-			 (int)min(count, sizeof(temp) - 1), buf);
-	rc = strict_strtoul(temp, 0, &val);
-	if (rc)
-		return rc;
+	ret = kgsl_sysfs_store(buf, &val);
+	if (ret)
+		return ret;
 
 	mutex_lock(&device->mutex);
 
@@ -263,23 +421,20 @@ static int kgsl_pwrctrl_idle_timer_store(struct device *dev,
 					struct device_attribute *attr,
 					const char *buf, size_t count)
 {
-	char temp[20];
-	unsigned long val;
+	unsigned int val = 0;
 	struct kgsl_device *device = kgsl_device_from_dev(dev);
 	struct kgsl_pwrctrl *pwr;
 	const long div = 1000/HZ;
 	static unsigned int org_interval_timeout = 1;
-	int rc;
+	int ret;
 
 	if (device == NULL)
 		return 0;
 	pwr = &device->pwrctrl;
 
-	snprintf(temp, sizeof(temp), "%.*s",
-			 (int)min(count, sizeof(temp) - 1), buf);
-	rc = strict_strtoul(temp, 0, &val);
-	if (rc)
-		return rc;
+	ret = kgsl_sysfs_store(buf, &val);
+	if (ret)
+		return ret;
 
 	if (org_interval_timeout == 1)
 		org_interval_timeout = pwr->interval_timeout;
