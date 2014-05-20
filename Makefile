@@ -565,7 +565,7 @@ all: vmlinux
 ifdef CONFIG_CC_OPTIMIZE_FOR_SIZE
 KBUILD_CFLAGS	+= -Os
 else
-KBUILD_CFLAGS	+= -Ofast -mtune=cortex-a15 -mfpu=neon-vfpv4 -mfloat-abi=softfp
+KBUILD_CFLAGS	+= -O3 -mtune=cortex-a15 -mfpu=neon-vfpv4 -mfloat-abi=softfp
 endif
 
 include $(srctree)/arch/$(SRCARCH)/Makefile
