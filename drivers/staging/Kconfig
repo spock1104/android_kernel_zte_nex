@@ -137,4 +137,6 @@ source "drivers/staging/ozwpan/Kconfig"
 #include zte ftm kconfig,add by huang.yanjun
 source "drivers/staging/zte_ftm/Kconfig"
 
+source "drivers/staging/prima/Kconfig"
+
 endif # STAGING
