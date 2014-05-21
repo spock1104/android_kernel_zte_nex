@@ -7407,7 +7407,7 @@ WLANTL_STARxAuth
    v_U16_t                  usActualHLen = 0;   
    v_U8_t                   ucTid;
 #ifdef FEATURE_WLAN_WAPI
-   v_U16_t                  usEtherType = 0;
+   v_U16_t                  usEtherType;
 #endif
    v_U16_t                  usPktLen;
    vos_pkt_t*               vosDataBuff ;
