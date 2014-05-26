@@ -84,13 +84,10 @@ static int set_cpu_freq(struct cpufreq_policy *policy, unsigned int new_freq)
 		saved_sched_rt_prio = current->rt_priority;
 		sched_setscheduler_nocheck(current, SCHED_FIFO, &param);
 	}
-
 	cpufreq_notify_transition(&freqs, CPUFREQ_PRECHANGE);
-
 	ret = acpuclk_set_rate(policy->cpu, new_freq, SETRATE_CPUFREQ);
 	if (!ret)
 		cpufreq_notify_transition(&freqs, CPUFREQ_POSTCHANGE);
-
 	/* Restore priority after clock ramp-up */
 	if (freqs.new > freqs.old && saved_sched_policy >= 0) {
 		param.sched_priority = saved_sched_rt_prio;
@@ -213,7 +210,7 @@ int msm_cpufreq_set_freq_limits(uint32_t cpu, uint32_t min, uint32_t max)
 }
 EXPORT_SYMBOL(msm_cpufreq_set_freq_limits);
 
-static int __cpuinit msm_cpufreq_init(struct cpufreq_policy *policy)
+static int msm_cpufreq_init(struct cpufreq_policy *policy)
 {
 	int cur_freq;
 	int index;
@@ -266,11 +263,14 @@ static int __cpuinit msm_cpufreq_init(struct cpufreq_policy *policy)
 
 	policy->cpuinfo.transition_latency =
 		acpuclk_get_switch_time() * NSEC_PER_USEC;
+	/* set safe default min and max speeds */
+	policy->max = CONFIG_MSM_CPU_FREQ_MAX;
+	policy->min = CONFIG_MSM_CPU_FREQ_MIN;
 
 	return 0;
 }
 
-static int __cpuinit msm_cpufreq_cpu_callback(struct notifier_block *nfb,
+static int msm_cpufreq_cpu_callback(struct notifier_block *nfb,
 		unsigned long action, void *hcpu)
 {
 	unsigned int cpu = (unsigned long)hcpu;
@@ -360,3 +360,4 @@ static int __init msm_cpufreq_register(void)
 }
 
 late_initcall(msm_cpufreq_register);
+

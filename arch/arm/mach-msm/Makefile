@@ -7,6 +7,7 @@ endif
 obj-y += clock.o clock-voter.o clock-dummy.o
 obj-y += modem_notifier.o subsystem_map.o
 obj-$(CONFIG_CPU_FREQ_MSM) += cpufreq.o
+obj-$(CONFIG_MSM_MPDEC) += msm_mpdecision.o
 obj-$(CONFIG_DEBUG_FS) += nohlt.o clock-debug.o
 obj-$(CONFIG_KEXEC) += msm_kexec.o
 
@@ -299,7 +300,7 @@ obj-$(CONFIG_ARCH_MSM8974) += clock-local2.o clock-pll.o clock-8974.o clock-rpm.
 obj-$(CONFIG_ARCH_MSM8974) += gdsc.o
 obj-$(CONFIG_ARCH_MSM8974) += krait-regulator.o
 obj-$(CONFIG_ARCH_MSM9625) += board-9625.o board-9625-gpiomux.o
-obj-$(CONFIG_ARCH_MSM8930) += acpuclock-8930.o acpuclock-8627.o acpuclock-8930aa.o
+obj-$(CONFIG_ARCH_MSM8930) += acpuclock-8930.o acpuclock-8627.o
 obj-$(CONFIG_ARCH_MPQ8092) += board-8092.o board-8092-gpiomux.o
 
 obj-$(CONFIG_MACH_SAPPHIRE) += board-sapphire.o board-sapphire-gpio.o
