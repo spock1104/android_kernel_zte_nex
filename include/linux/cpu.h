@@ -116,7 +116,7 @@ enum {
 /* Need to know about CPUs going up/down? */
 #if defined(CONFIG_HOTPLUG_CPU) || !defined(MODULE)
 #define cpu_notifier(fn, pri) {					\
-	static struct notifier_block fn##_nb __cpuinitdata =	\
+	static struct notifier_block fn##_nb =	\
 		{ .notifier_call = fn, .priority = pri };	\
 	register_cpu_notifier(&fn##_nb);			\
 }
@@ -204,7 +204,7 @@ static inline void cpu_hotplug_driver_unlock(void)
 #define unregister_hotcpu_notifier(nb)	({ (void)(nb); })
 #endif		/* CONFIG_HOTPLUG_CPU */
 
-#ifdef CONFIG_PM_SLEEP_SMP
+#if defined(CONFIG_PM_SLEEP_SMP) && !defined(CONFIG_MSM_MPDEC)
 extern int disable_nonboot_cpus(void);
 extern void enable_nonboot_cpus(void);
 #else /* !CONFIG_PM_SLEEP_SMP */
