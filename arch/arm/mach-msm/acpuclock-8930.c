@@ -17,31 +17,18 @@
 #include <mach/rpm-regulator.h>
 #include <mach/msm_bus_board.h>
 #include <mach/msm_bus.h>
-#include <mach/msm_bus_board.h>
 #include <mach/socinfo.h>
 #include <mach/msm-krait-l2-accessors.h>
-#include <mach/rpm-regulator.h>
 
 #include "acpuclock.h"
 #include "acpuclock-krait.h"
 #include "pm.h"
 
-/*
- * Source IDs.
- * These must be negative to not overlap with the source IDs
- * used by the 8x60 local clock driver.
- */
-#define PLL_8			 0
-#define HFPLL			-1
-#define QSB			-2
 /* Corner type vreg VDD values */
 #define LVL_NONE	RPM_VREG_CORNER_NONE
 #define LVL_LOW		RPM_VREG_CORNER_LOW
 #define LVL_NOM		RPM_VREG_CORNER_NOMINAL
 #define LVL_HIGH	RPM_VREG_CORNER_HIGH
-
-
-#define STBY_KHZ 1
 
 static struct hfpll_data hfpll_data __initdata = {
 	.mode_offset = 0x00,
