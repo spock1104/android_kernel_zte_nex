@@ -355,40 +355,34 @@ static int kgsl_pwrctrl_max_gpuclk_store(struct device *dev,
 	if (ret)
 		return ret;
 
-	if (val == 450000000)
+	if (val == 400000000)
 	{
-		//pwr->pwrlevels[0].gpu_freq = val;
-		//SetMAXGPUFreq(val);
+		SetGPUpll_config(0x1D, val);
+	}
+
+	else if (val == 450000000)
+	{
 		SetGPUpll_config(0x21, val);
 	}
 	else if (val == 487500000)
 	{
-		//pwr->pwrlevels[0].gpu_freq = val;
-		//SetMAXGPUFreq(val);
+;
 		SetGPUpll_config(0x24, val);
 	}
 	else if (val == 504000000)
 	{
-		//pwr->pwrlevels[0].gpu_freq = val;
-		//SetMAXGPUFreq(val);
 		SetGPUpll_config(0x25, val);
 	}
 	else if (val == 545000000)
 	{
-		//pwr->pwrlevels[0].gpu_freq = val;
-		//SetMAXGPUFreq(val);
 		SetGPUpll_config(0x28, val);
 	}
 	else if (val == 600000000)
 	{
-		//pwr->pwrlevels[0].gpu_freq = val;
-		//SetMAXGPUFreq(val);
 		SetGPUpll_config(0x2C, val);
 	}
 	else if (val == 627000000)
 	{
-		//pwr->pwrlevels[0].gpu_freq = val;
-		//SetMAXGPUFreq(val);
 		SetGPUpll_config(0x2E, val);
 	}
 
@@ -618,6 +612,7 @@ static int kgsl_pwrctrl_gpu_available_frequencies_show(
 			num_chars += snprintf(buf + num_chars, PAGE_SIZE, "%d ",545000000);
 			num_chars += snprintf(buf + num_chars, PAGE_SIZE, "%d ",504000000);
 			num_chars += snprintf(buf + num_chars, PAGE_SIZE, "%d ",487500000);
+			num_chars += snprintf(buf + num_chars, PAGE_SIZE, "%d ",450000000);
 			num_chars += snprintf(buf + num_chars, PAGE_SIZE, "%d ",450000000);
 		}
 		else
