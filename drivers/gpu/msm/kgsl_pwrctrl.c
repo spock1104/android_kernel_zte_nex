@@ -35,7 +35,7 @@
 
 struct kgsl_device *Gbldevice;
 unsigned long orig_max;
-unsigned long internal_max = 487500000;
+unsigned long internal_max = 400000000;
 
 #ifdef CONFIG_MSM_KGSL_KERNEL_API_ENABLE
 struct device *stored_dev;
@@ -613,7 +613,7 @@ static int kgsl_pwrctrl_gpu_available_frequencies_show(
 			num_chars += snprintf(buf + num_chars, PAGE_SIZE, "%d ",504000000);
 			num_chars += snprintf(buf + num_chars, PAGE_SIZE, "%d ",487500000);
 			num_chars += snprintf(buf + num_chars, PAGE_SIZE, "%d ",450000000);
-			num_chars += snprintf(buf + num_chars, PAGE_SIZE, "%d ",450000000);
+			num_chars += snprintf(buf + num_chars, PAGE_SIZE, "%d ",400000000);
 		}
 		else
 			num_chars += snprintf(buf + num_chars, PAGE_SIZE, "%d ",pwr->pwrlevels[index].gpu_freq);
