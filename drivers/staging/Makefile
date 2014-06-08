@@ -59,4 +59,7 @@ obj-$(CONFIG_PHONE)		+= telephony/
 obj-$(CONFIG_RAMSTER)		+= ramster/
 obj-$(CONFIG_USB_WPAN_HCD)	+= ozwpan/
 obj-$(CONFIG_PRIMA_WLAN)	+= prima/
+obj-$(CONFIG_ZRAM)		+= zram/
+obj-$(CONFIG_ZCACHE)		+= zcache/
+obj-$(CONFIG_ZSMALLOC)		+= zsmalloc/
 obj-y				+= zte_ftm/
