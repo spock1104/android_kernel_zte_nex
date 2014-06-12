@@ -1,4 +1,4 @@
-/* Copyright (c) 2002,2007-2012, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2002,2007-2012, Code Aurora Forum. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -127,8 +127,7 @@ adreno_ringbuffer_restore(struct adreno_ringbuffer *rb, unsigned int *rb_buff,
 			int num_rb_contents);
 
 unsigned int *adreno_ringbuffer_allocspace(struct adreno_ringbuffer *rb,
-						struct adreno_context *context,
-						unsigned int numcmds);
+					     unsigned int numcmds);
 
 int adreno_ringbuffer_read_pfp_ucode(struct kgsl_device *device);
 

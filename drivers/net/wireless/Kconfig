@@ -303,11 +303,11 @@ config WCNSS_CORE
 	---help---
 	  Core driver for the Qualcomm WCNSS triple play connectivity subsystem
 
-config WCNSS_CORE_PRONTO
-	tristate "Qualcomm WCNSS Pronto Support"
+config WCNSS_CCX
+	bool "Qualcomm WCNSS CCX Feature"
 	depends on WCNSS_CORE
 	---help---
-	  Pronto Support for the Qualcomm WCNSS triple play connectivity subsystem
+	  CCX Feature of WCNSS Core driver
 
 config WCNSS_MEM_PRE_ALLOC
 	tristate "WCNSS pre-alloc memory support"

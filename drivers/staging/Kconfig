@@ -134,6 +134,8 @@ source "drivers/staging/ramster/Kconfig"
 
 source "drivers/staging/ozwpan/Kconfig"
 
+source "drivers/staging/prima/Kconfig"
+
 #include zte ftm kconfig,add by huang.yanjun
 source "drivers/staging/zte_ftm/Kconfig"
 

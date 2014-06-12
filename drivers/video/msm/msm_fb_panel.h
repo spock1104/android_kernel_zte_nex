@@ -64,6 +64,12 @@ enum {
 /* panel info type */
 struct lcd_panel_info {
 	__u32 vsync_enable;
+	__u32 primary_vsync_init;
+	__u32 primary_rdptr_irq;
+	__u32 primary_start_pos;
+	__u32 vsync_threshold_continue;
+	__u32 vsync_threshold_start;
+	__u32 total_lines;
 	__u32 refx100;
 	__u32 v_back_porch;
 	__u32 v_front_porch;
@@ -177,11 +183,17 @@ struct msm_panel_info {
 	__u32 frame_rate;
 	__u32 frame_interval;
 
+	/* physical size in mm */
+	__u32 width;
+	__u32 height;
+
 	struct mddi_panel_info mddi;
 	struct lcd_panel_info lcd;
 	struct lcdc_panel_info lcdc;
 	struct mipi_panel_info mipi;
 	struct lvds_panel_info lvds;
+	__u32 xres_aligned;
+	__u32 yres_aligned;
 };
 
 #define MSM_FB_SINGLE_MODE_PANEL(pinfo)		\
@@ -196,13 +208,23 @@ struct msm_fb_panel_data {
 	void (*set_rect) (int x, int y, int xres, int yres);
 	void (*set_vsync_notifier) (msm_fb_vsync_handler_type, void *arg);
 	void (*set_backlight) (struct msm_fb_data_type *);
+	int (*get_backlight_on_status) (void);
 
 	/* function entry chain */
 	int (*on) (struct platform_device *pdev);
+	int (*controller_on_panel_on) (struct platform_device *pdev);
 	int (*off) (struct platform_device *pdev);
+	int power_on_panel_at_pan;
+	int (*late_init) (struct platform_device *pdev);
+	int (*early_off) (struct platform_device *pdev);
 	int (*power_ctrl) (boolean enable);
 	struct platform_device *next;
 	int (*clk_func) (int enable);
+	int (*fps_level_change) (struct platform_device *pdev,
+					u32 fps_level);
+	struct msm_panel_info *(*panel_detect) (struct msm_fb_data_type *mfd);
+	int (*update_panel) (struct platform_device *pdev);
+	int (*get_pcc_data) (struct msm_fb_data_type *mfd);
 };
 
 /*===========================================================================
@@ -212,6 +234,10 @@ struct platform_device *msm_fb_device_alloc(struct msm_fb_panel_data *pdata,
 						u32 type, u32 id);
 int panel_next_on(struct platform_device *pdev);
 int panel_next_off(struct platform_device *pdev);
+int panel_next_fps_level_change(struct platform_device *pdev,
+					u32 fps_level);
+int panel_next_late_init(struct platform_device *pdev);
+int panel_next_early_off(struct platform_device *pdev);
 
 int lcdc_device_register(struct msm_panel_info *pinfo);
 

@@ -1,4 +1,4 @@
-/* Copyright (c) 2008-2012, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2008-2013, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -40,22 +40,18 @@ u32 esc_byte_ratio;
 
 static boolean tlmm_settings = FALSE;
 
-
-static int first_time_dsi_on = 1;
-
-
 static int mipi_dsi_probe(struct platform_device *pdev);
 static int mipi_dsi_remove(struct platform_device *pdev);
 
 static int mipi_dsi_off(struct platform_device *pdev);
 static int mipi_dsi_on(struct platform_device *pdev);
+static int mipi_dsi_fps_level_change(struct platform_device *pdev,
+					u32 fps_level);
 
 static struct platform_device *pdev_list[MSM_FB_MAX_DEV_LIST];
 static int pdev_list_cnt;
 static struct mipi_dsi_platform_data *mipi_dsi_pdata;
-//rms
-int modify_clk(struct platform_device *pdev, int frame_rate);
-//end
+
 static int vsync_gpio = -1;
 
 static struct platform_driver mipi_dsi_driver = {
@@ -68,6 +64,14 @@ static struct platform_driver mipi_dsi_driver = {
 };
 
 struct device dsi_dev;
+
+static int mipi_dsi_fps_level_change(struct platform_device *pdev,
+					u32 fps_level)
+{
+	mipi_dsi_wait4video_done();
+	mipi_dsi_configure_fb_divider(fps_level);
+	return 0;
+}
 
 static int mipi_dsi_off(struct platform_device *pdev)
 {
@@ -86,7 +90,7 @@ static int mipi_dsi_off(struct platform_device *pdev)
 		down(&mfd->dma->mutex);
 
 	if (mfd->panel_info.type == MIPI_CMD_PANEL) {
-		mipi_dsi_prepare_clocks();
+		mipi_dsi_prepare_ahb_clocks();
 		mipi_dsi_ahb_ctrl(1);
 		mipi_dsi_clk_enable();
 
@@ -112,9 +116,7 @@ static int mipi_dsi_off(struct platform_device *pdev)
 
 	ret = panel_next_off(pdev);
 
-#ifdef CONFIG_MSM_BUS_SCALING
-	mdp_bus_scale_update_request(0);
-#endif
+	spin_lock_bh(&dsi_clk_lock);
 
 	mipi_dsi_clk_disable();
 
@@ -124,8 +126,10 @@ static int mipi_dsi_off(struct platform_device *pdev)
 	mipi_dsi_phy_ctrl(0);
 
 	mipi_dsi_ahb_ctrl(0);
+	spin_unlock_bh(&dsi_clk_lock);
 
 	mipi_dsi_unprepare_clocks();
+	mipi_dsi_unprepare_ahb_clocks();
 	if (mipi_dsi_pdata && mipi_dsi_pdata->dsi_power_save)
 		mipi_dsi_pdata->dsi_power_save(0);
 
@@ -134,7 +138,7 @@ static int mipi_dsi_off(struct platform_device *pdev)
 	else
 		up(&mfd->dma->mutex);
 
-	pr_debug("End of %s ....:\n", __func__);
+	pr_debug("%s-:\n", __func__);
 
 	return ret;
 }
@@ -152,25 +156,19 @@ static int mipi_dsi_on(struct platform_device *pdev)
 	u32 ystride, bpp, data;
 	u32 dummy_xres, dummy_yres;
 	int target_type = 0;
-	
-       printk("\nLCD %s: \n", __func__);
-	   
+
 	pr_debug("%s+:\n", __func__);
 
 	mfd = platform_get_drvdata(pdev);
 	fbi = mfd->fbi;
 	var = &fbi->var;
 	pinfo = &mfd->panel_info;
-	//rms
-	modify_clk(pdev, mfd->new_frame_rate);
-	//end
-	esc_byte_ratio = pinfo->mipi.esc_byte_ratio;
 
 	if (mipi_dsi_pdata && mipi_dsi_pdata->dsi_power_save)
 		mipi_dsi_pdata->dsi_power_save(1);
 
 	cont_splash_clk_ctrl(0);
-	mipi_dsi_prepare_clocks();
+	mipi_dsi_prepare_ahb_clocks();
 
 	mipi_dsi_ahb_ctrl(1);
 
@@ -182,14 +180,7 @@ static int mipi_dsi_on(struct platform_device *pdev)
 	if (mdp_rev == MDP_REV_42 && mipi_dsi_pdata)
 		target_type = mipi_dsi_pdata->target_type;
 
-	if(first_time_dsi_on) 	
-	{		
-		first_time_dsi_on = 0;	
-	}	
-	else	
-	{
-		mipi_dsi_phy_init(0, &(mfd->panel_info), target_type);
-	}
+	mipi_dsi_phy_init(0, &(mfd->panel_info), target_type);
 
 	mipi_dsi_clk_enable();
 
@@ -327,22 +318,30 @@ static int mipi_dsi_on(struct platform_device *pdev)
 			mipi_dsi_set_tear_on(mfd);
 		}
 		mipi_dsi_clk_disable();
-		mipi_dsi_ahb_ctrl(0);
 		mipi_dsi_unprepare_clocks();
+		mipi_dsi_ahb_ctrl(0);
+		mipi_dsi_unprepare_ahb_clocks();
 	}
-
-#ifdef CONFIG_MSM_BUS_SCALING
-	mdp_bus_scale_update_request(2);
-#endif
 
 	if (mdp_rev >= MDP_REV_41)
 		mutex_unlock(&mfd->dma->ov_mutex);
 	else
 		up(&mfd->dma->mutex);
 
-	pr_debug("End of %s....:\n", __func__);
+	pr_debug("%s-:\n", __func__);
 
 	return ret;
+}
+
+static int mipi_dsi_early_off(struct platform_device *pdev)
+{
+	return panel_next_early_off(pdev);
+}
+
+
+static int mipi_dsi_late_init(struct platform_device *pdev)
+{
+	return panel_next_late_init(pdev);
 }
 
 
@@ -439,11 +438,13 @@ static int mipi_dsi_probe(struct platform_device *pdev)
 
 		if (mipi_dsi_pdata->splash_is_enabled &&
 			!mipi_dsi_pdata->splash_is_enabled()) {
+			mipi_dsi_prepare_ahb_clocks();
 			mipi_dsi_ahb_ctrl(1);
 			MIPI_OUTP(MIPI_DSI_BASE + 0x118, 0);
 			MIPI_OUTP(MIPI_DSI_BASE + 0x0, 0);
 			MIPI_OUTP(MIPI_DSI_BASE + 0x200, 0);
 			mipi_dsi_ahb_ctrl(0);
+			mipi_dsi_unprepare_ahb_clocks();
 		}
 		mipi_dsi_resource_initialized = 1;
 
@@ -489,6 +490,9 @@ static int mipi_dsi_probe(struct platform_device *pdev)
 	pdata = mdp_dev->dev.platform_data;
 	pdata->on = mipi_dsi_on;
 	pdata->off = mipi_dsi_off;
+	pdata->fps_level_change = mipi_dsi_fps_level_change;
+	pdata->late_init = mipi_dsi_late_init;
+	pdata->early_off = mipi_dsi_early_off;
 	pdata->next = pdev;
 
 	/*
@@ -566,7 +570,6 @@ static int mipi_dsi_probe(struct platform_device *pdev)
 			mfd->panel_info.clk_rate =
 			((h_period * v_period * (mipi->frame_rate) * bpp * 8)
 			   / lanes);
-			printk(KERN_ERR"rms:(%s:%d) clk_rate %u", __FUNCTION__, __LINE__, mfd->panel_info.clk_rate);
 		} else {
 			pr_err("%s: forcing mipi_dsi lanes to 1\n", __func__);
 			mfd->panel_info.clk_rate =
@@ -600,6 +603,8 @@ static int mipi_dsi_probe(struct platform_device *pdev)
 
 	pdev_list[pdev_list_cnt++] = pdev;
 
+	esc_byte_ratio = pinfo->mipi.esc_byte_ratio;
+
 	if (!mfd->cont_splash_done)
 		cont_splash_clk_ctrl(1);
 
@@ -609,101 +614,7 @@ mipi_dsi_probe_err:
 	platform_device_put(mdp_dev);
 	return rc;
 }
-//rms
-int modify_clk(struct platform_device *pdev, int frame_rate)
-{
-	struct msm_fb_data_type *mfd;
-	struct mipi_panel_info *mipi;
-	int rc;
-	uint8 lanes = 0, bpp;
-	uint32 h_period, v_period, dsi_pclk_rate;
-	printk(KERN_ERR"rms:(%s:%d) new_frame_rate %d", __FUNCTION__, __LINE__, frame_rate);
-	if (frame_rate > 70 || frame_rate <= 20) {
-		return -EINVAL;
-	}
-	mfd = platform_get_drvdata(pdev);
 
-	if (!mfd)
-		return -ENODEV;
-
-	if (mfd->key != MFD_KEY)
-		return -EINVAL;
-
-	/*
-	 * get/set panel specific fb info
-	 */
-
-	h_period = ((mfd->panel_info.lcdc.h_pulse_width)
-			+ (mfd->panel_info.lcdc.h_back_porch)
-			+ (mfd->panel_info.xres)
-			+ (mfd->panel_info.lcdc.h_front_porch));
-
-	v_period = ((mfd->panel_info.lcdc.v_pulse_width)
-			+ (mfd->panel_info.lcdc.v_back_porch)
-			+ (mfd->panel_info.yres)
-			+ (mfd->panel_info.lcdc.v_front_porch));
-
-	mipi  = &mfd->panel_info.mipi;
-	if (mipi->frame_rate == frame_rate) {
-		return 0;
-	}
-	printk(KERN_ERR"rms:(%s:%d) need modify frame_rate clk_rate %u old = %d new = %d", __FUNCTION__, __LINE__, mfd->panel_info.clk_rate, mipi->frame_rate, frame_rate);
-
-	if (mipi->data_lane3)
-		lanes += 1;
-	if (mipi->data_lane2)
-		lanes += 1;
-	if (mipi->data_lane1)
-		lanes += 1;
-	if (mipi->data_lane0)
-		lanes += 1;
-
-	if ((mipi->dst_format == DSI_CMD_DST_FORMAT_RGB888)
-	    || (mipi->dst_format == DSI_VIDEO_DST_FORMAT_RGB888)
-	    || (mipi->dst_format == DSI_VIDEO_DST_FORMAT_RGB666_LOOSE))
-		bpp = 3;
-	else if ((mipi->dst_format == DSI_CMD_DST_FORMAT_RGB565)
-		 || (mipi->dst_format == DSI_VIDEO_DST_FORMAT_RGB565))
-		bpp = 2;
-	else
-		bpp = 3;		/* Default format set to RGB888 */
-
-	if (mfd->panel_info.type == MIPI_VIDEO_PANEL) {
-		h_period += mfd->panel_info.lcdc.xres_pad;
-		v_period += mfd->panel_info.lcdc.yres_pad;
-
-		if (lanes > 0) {
-			unsigned int clk = mfd->panel_info.clk_rate;
-			mfd->panel_info.clk_rate =
-			((h_period * v_period * (frame_rate) * bpp * 8)
-			   / lanes);
-			printk(KERN_ERR"rms:(%s:%d) new clk_rate %u lanes %d old clk %u", __FUNCTION__, __LINE__, mfd->panel_info.clk_rate, lanes, clk);
-		} else {
-			pr_err("%s: forcing mipi_dsi lanes to 1\n", __func__);
-			mfd->panel_info.clk_rate =
-				(h_period * v_period
-					 * (mipi->frame_rate) * bpp * 8);
-		}
-	}
-	mipi->frame_rate = frame_rate;
-	pll_divider_config.clk_rate = mfd->panel_info.clk_rate;
-
-	rc = mipi_dsi_clk_div_config(bpp, lanes, &dsi_pclk_rate);
-	if (rc)
-		goto mipi_dsi_probe_err;
-
-	if ((dsi_pclk_rate < 3300000) || (dsi_pclk_rate > 223000000)) {
-		pr_err("%s: Pixel clock not supported\n", __func__);
-		dsi_pclk_rate = 35000000;
-	}
-	mipi->dsi_pclk_rate = dsi_pclk_rate;
-
-	return 0;
-
-mipi_dsi_probe_err:
-	return rc;
-}
-EXPORT_SYMBOL(modify_clk);
 static int mipi_dsi_remove(struct platform_device *pdev)
 {
 	struct msm_fb_data_type *mfd;

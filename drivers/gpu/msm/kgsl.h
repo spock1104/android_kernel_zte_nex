@@ -1,4 +1,4 @@
-/* Copyright (c) 2008-2012, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2008-2012, Code Aurora Forum. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -175,8 +175,8 @@ struct kgsl_mem_entry {
 void kgsl_mem_entry_destroy(struct kref *kref);
 int kgsl_postmortem_dump(struct kgsl_device *device, int manual);
 
-struct kgsl_mem_entry *kgsl_get_mem_entry(struct kgsl_device *device,
-		unsigned int ptbase, unsigned int gpuaddr, unsigned int size);
+struct kgsl_mem_entry *kgsl_get_mem_entry(unsigned int ptbase,
+		unsigned int gpuaddr, unsigned int size);
 
 struct kgsl_mem_entry *kgsl_sharedmem_find_region(
 	struct kgsl_process_private *private, unsigned int gpuaddr,

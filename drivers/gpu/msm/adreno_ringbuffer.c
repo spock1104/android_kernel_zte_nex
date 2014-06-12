@@ -1,4 +1,4 @@
-/* Copyright (c) 2002,2007-2012, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2002,2007-2012, Code Aurora Forum. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -52,10 +52,9 @@ void adreno_ringbuffer_submit(struct adreno_ringbuffer *rb)
 	adreno_regwrite(rb->device, REG_CP_RB_WPTR, rb->wptr);
 }
 
-static int
-adreno_ringbuffer_waitspace(struct adreno_ringbuffer *rb,
-				struct adreno_context *context,
-				unsigned int numcmds, int wptr_ahead)
+static void
+adreno_ringbuffer_waitspace(struct adreno_ringbuffer *rb, unsigned int numcmds,
+			  int wptr_ahead)
 {
 	int nopcount;
 	unsigned int freecmds;
@@ -129,28 +128,19 @@ adreno_ringbuffer_waitspace(struct adreno_ringbuffer *rb,
 		continue;
 
 err:
-		if (!adreno_dump_and_recover(rb->device)) {
-			if (context && context->flags & CTXT_FLAGS_GPU_HANG) {
-				KGSL_CTXT_WARN(rb->device,
-				"Context %p caused a gpu hang. Will not accept commands for context %d\n",
-				context, context->id);
-				return -EDEADLK;
-			}
-			wait_time = jiffies + wait_timeout;
-		} else {
-			/* GPU is hung and we cannot recover */
-			BUG();
-		}
+		if (!adreno_dump_and_recover(rb->device))
+				wait_time = jiffies + wait_timeout;
+			else
+				/* GPU is hung and we cannot recover */
+				BUG();
 	}
-	return 0;
 }
 
 unsigned int *adreno_ringbuffer_allocspace(struct adreno_ringbuffer *rb,
-					struct adreno_context *context,
-					unsigned int numcmds)
+					     unsigned int numcmds)
 {
-	unsigned int *ptr = NULL;
-	int ret = 0;
+	unsigned int	*ptr = NULL;
+
 	BUG_ON(numcmds >= rb->sizedwords);
 
 	GSL_RB_GET_READPTR(rb, &rb->rptr);
@@ -160,25 +150,20 @@ unsigned int *adreno_ringbuffer_allocspace(struct adreno_ringbuffer *rb,
 		/* reserve dwords for nop packet */
 		if ((rb->wptr + numcmds) > (rb->sizedwords -
 				GSL_RB_NOP_SIZEDWORDS))
-			ret = adreno_ringbuffer_waitspace(rb, context,
-							numcmds, 1);
+			adreno_ringbuffer_waitspace(rb, numcmds, 1);
 	} else {
 		/* wptr behind rptr */
 		if ((rb->wptr + numcmds) >= rb->rptr)
-			ret = adreno_ringbuffer_waitspace(rb, context,
-							numcmds, 0);
+			adreno_ringbuffer_waitspace(rb, numcmds, 0);
 		/* check for remaining space */
 		/* reserve dwords for nop packet */
-		if (!ret && (rb->wptr + numcmds) > (rb->sizedwords -
+		if ((rb->wptr + numcmds) > (rb->sizedwords -
 				GSL_RB_NOP_SIZEDWORDS))
-			ret = adreno_ringbuffer_waitspace(rb, context,
-							numcmds, 1);
+			adreno_ringbuffer_waitspace(rb, numcmds, 1);
 	}
 
-	if (!ret) {
-		ptr = (unsigned int *)rb->buffer_desc.hostptr + rb->wptr;
-		rb->wptr += numcmds;
-	}
+	ptr = (unsigned int *)rb->buffer_desc.hostptr + rb->wptr;
+	rb->wptr += numcmds;
 
 	return ptr;
 }
@@ -456,15 +441,8 @@ int adreno_ringbuffer_start(struct adreno_ringbuffer *rb, unsigned int init_ram)
 
 void adreno_ringbuffer_stop(struct adreno_ringbuffer *rb)
 {
-	struct kgsl_device *device = rb->device;
-	struct adreno_device *adreno_dev = ADRENO_DEVICE(device);
-
-	if (rb->flags & KGSL_FLAGS_STARTED) {
-		if (adreno_is_a200(adreno_dev))
-			adreno_regwrite(rb->device, REG_CP_ME_CNTL, 0x10000000);
-
+	if (rb->flags & KGSL_FLAGS_STARTED)
 		rb->flags &= ~KGSL_FLAGS_STARTED;
-	}
 }
 
 int adreno_ringbuffer_init(struct kgsl_device *device)
@@ -567,12 +545,13 @@ adreno_ringbuffer_addcmds(struct adreno_ringbuffer *rb,
 		total_sizedwords += 4; /* global timestamp for recovery*/
 	}
 
-	ringcmds = adreno_ringbuffer_allocspace(rb, context, total_sizedwords);
-	if (!ringcmds) {
-		/*
-		 * We could not allocate space in ringbuffer, just return the
-		 * last timestamp
-		 */
+	ringcmds = adreno_ringbuffer_allocspace(rb, total_sizedwords);
+	/* GPU may hang during space allocation, if thats the case the current
+	 * context may have hung the GPU */
+	if (context->flags & CTXT_FLAGS_GPU_HANG) {
+		KGSL_CTXT_WARN(rb->device,
+		"Context %p caused a gpu hang. Will not accept commands for context %d\n",
+		context, context->id);
 		return rb->timestamp[context_id];
 	}
 

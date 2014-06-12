@@ -38,6 +38,13 @@
 #include "ion_priv.h"
 #define DEBUG
 
+// #define VERBOSE_IOCTLS
+#ifdef VERBOSE_IOCTLS
+#define  TRACE_IOCTL(fmt...) do { printk(fmt); } while(0)
+#else
+#define TRACE_IOCTL(fmt...) while(0)
+#endif
+
 /**
  * struct ion_device - the metadata of the ion device node
  * @dev:		the actual misc device
@@ -1355,6 +1362,7 @@ static long ion_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 	case ION_IOC_ALLOC:
 	{
 		struct ion_allocation_data data;
+		TRACE_IOCTL("PL:ION_IOC_ALLOC\n");
 
 		if (copy_from_user(&data, (void __user *)arg, sizeof(data)))
 			return -EFAULT;
@@ -1374,6 +1382,7 @@ static long ion_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 	{
 		struct ion_handle_data data;
 		bool valid;
+		TRACE_IOCTL("PL:ION_IOC_FREE\n");
 
 		if (copy_from_user(&data, (void __user *)arg,
 				   sizeof(struct ion_handle_data)))
@@ -1495,7 +1504,10 @@ static long ion_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 		break;
 	}
 	default:
+	{
+	  printk("PL:ION Ioctl, !!!! unknown ioctl command=%X !!!!\n", cmd);
 		return -ENOTTY;
+	}
 	}
 	return 0;
 }

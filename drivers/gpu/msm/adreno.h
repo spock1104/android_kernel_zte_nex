@@ -1,4 +1,4 @@
-/* Copyright (c) 2008-2012, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2008-2012, Code Aurora Forum. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -101,7 +101,6 @@ struct adreno_device {
 	unsigned int fast_hang_detect;
 	unsigned int gpulist_index;
 	struct ocmem_buf *ocmem_hdl;
-	unsigned int ocmem_base;
 };
 
 struct adreno_gpudev {
@@ -167,9 +166,6 @@ extern const unsigned int a225_registers_count;
 /* A3XX register set defined in adreno_a3xx.c */
 extern const unsigned int a3xx_registers[];
 extern const unsigned int a3xx_registers_count;
-
-extern const unsigned int a330_registers[];
-extern const unsigned int a330_registers_count;
 
 extern unsigned int hang_detect_regs[];
 extern const unsigned int hang_detect_regs_count;
@@ -256,11 +252,6 @@ static inline int adreno_is_a305(struct adreno_device *adreno_dev)
 static inline int adreno_is_a320(struct adreno_device *adreno_dev)
 {
 	return (adreno_dev->gpurev == ADRENO_REV_A320);
-}
-
-static inline int adreno_is_a330(struct adreno_device *adreno_dev)
-{
-	return (adreno_dev->gpurev == ADRENO_REV_A330);
 }
 
 static inline int adreno_rb_ctxtswitch(unsigned int *cmd)
