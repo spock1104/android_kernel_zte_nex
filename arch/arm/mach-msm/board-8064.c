@@ -1952,7 +1952,7 @@ static struct msm_thermal_data msm_thermal_pdata = {
 
 	.allowed_low_high = 79,
 	.allowed_low_low = 73,
-	.allowed_low_freq = 1350000,
+	.allowed_low_freq = 1026000,
 };
 
 #define MSM_SHARED_RAM_PHYS 0x80000000
