@@ -1,3 +1,7 @@
+# CPUfreq core & drivers debugging
+ccflags-$(CONFIG_CPU_FREQ_DEBUG)		:= -DDEBUG
+ccflags-$(CONFIG_CPU_FREQ_VDEBUG)	+= -DVERBOSE_DEBUG
+
 # CPUfreq core
 obj-$(CONFIG_CPU_FREQ)			+= cpufreq.o
 # CPUfreq stats

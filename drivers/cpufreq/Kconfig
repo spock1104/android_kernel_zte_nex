@@ -17,6 +17,21 @@ config CPU_FREQ
 
 if CPU_FREQ
 
+config CPU_FREQ_DEBUG
+        bool "cpufreq debugging"
+        help
+	  This is an option for use by developers; most people should say N
+	  here. This enables cpufreq core and debugging.
+
+config CPU_FREQ_VDEBUG
+        bool "cpufreq verbose debugging"
+        depends on CPUFREQ_DEBUG != n
+        help
+	  This is an option for use by developers; most people should say N
+	  here.  This enables deeper (more verbose) debugging of the cpufreq
+	  core and drivers.
+
+
 config CPU_FREQ_TABLE
 	tristate
 
