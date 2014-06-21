@@ -144,18 +144,18 @@ abort:
 #ifndef CONFIG_ZTE_PLATFORM
 #define CONFIG_ZTE_PLATFORM
 #endif
-#ifdef CONFIG_ZTE_PLATFORM
-extern int cpufreq_set_min_freq(int flag);
-#endif
+//#ifdef CONFIG_ZTE_PLATFORM
+//extern int cpufreq_set_min_freq(int flag);
+//#endif
 static void late_resume(struct work_struct *work)
 {
 	struct early_suspend *pos;
 	unsigned long irqflags;
 	int abort = 0;
 
-	#ifdef CONFIG_ZTE_PLATFORM
-	cpufreq_set_min_freq(1);//set to max freq
-    #endif
+	//#ifdef CONFIG_ZTE_PLATFORM
+	//cpufreq_set_min_freq(1);//set to max freq
+    //#endif
 	mutex_lock(&early_suspend_lock);
 	spin_lock_irqsave(&state_lock, irqflags);
 	if (state == SUSPENDED)
@@ -186,9 +186,9 @@ static void late_resume(struct work_struct *work)
 #endif
 abort:
 	mutex_unlock(&early_suspend_lock);
-	#ifdef CONFIG_ZTE_PLATFORM
-	cpufreq_set_min_freq(0);//set to max freq
-    #endif
+	//#ifdef CONFIG_ZTE_PLATFORM
+	//cpufreq_set_min_freq(0);//set to max freq
+    //#endif
 }
 
 void request_suspend_state(suspend_state_t new_state)
