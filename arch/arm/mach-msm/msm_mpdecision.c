@@ -92,14 +92,12 @@ static struct msm_mpdec_tuners {
 	.boost_freq = {
 		MSM_MPDEC_BOOSTFREQ_CPU0,
 		MSM_MPDEC_BOOSTFREQ_CPU1,
-		MSM_MPDEC_BOOSTFREQ_CPU2,
-		MSM_MPDEC_BOOSTFREQ_CPU3
 	},
 #endif
 };
 
-static unsigned int NwNs_Threshold[8] = {12, 0, 20, 7, 25, 10, 0, 18};
-static unsigned int TwTs_Threshold[8] = {140, 0, 140, 190, 140, 190, 0, 190};
+static unsigned int NwNs_Threshold[8] = {12, 0, 0, 18};
+static unsigned int TwTs_Threshold[8] = {140, 0, 0, 190};
 
 extern unsigned int get_rq_info(void);
 extern unsigned long acpuclk_get_rate(int);
@@ -167,8 +165,8 @@ static void mpdec_cpu_up(int cpu) {
 		per_cpu(msm_mpdec_cpudata, cpu).on_time = ktime_to_ms(ktime_get());
 		per_cpu(msm_mpdec_cpudata, cpu).online = true;
 		per_cpu(msm_mpdec_cpudata, cpu).times_cpu_hotplugged += 1;
-		pr_info(MPDEC_TAG"CPU[%d] off->on | Mask=[%d%d%d%d]\n",
-			cpu, cpu_online(0), cpu_online(1), cpu_online(2), cpu_online(3));
+		pr_info(MPDEC_TAG"CPU[%d] off->on | Mask=[%d%d]\n",
+			cpu, cpu_online(0), cpu_online(1));
 		mutex_unlock(&per_cpu(msm_mpdec_cpudata, cpu).hotplug_mutex);
 	}
 }
@@ -183,8 +181,8 @@ static void mpdec_cpu_down(int cpu) {
 		per_cpu(msm_mpdec_cpudata, cpu).online = false;
 		per_cpu(msm_mpdec_cpudata, cpu).on_time_total += on_time;
 		per_cpu(msm_mpdec_cpudata, cpu).times_cpu_unplugged += 1;
-		pr_info(MPDEC_TAG"CPU[%d] on->off | Mask=[%d%d%d%d] | time online: %llu\n",
-			cpu, cpu_online(0), cpu_online(1), cpu_online(2), cpu_online(3), on_time);
+		pr_info(MPDEC_TAG"CPU[%d] on->off | Mask=[%d%d] | time online: %llu\n",
+			cpu, cpu_online(0), cpu_online(1), on_time);
 		mutex_unlock(&per_cpu(msm_mpdec_cpudata, cpu).hotplug_mutex);
 	}
 }
@@ -246,8 +244,8 @@ static int mp_decision(void) {
 
 	last_time = ktime_to_ms(ktime_get());
 #if DEBUG
-	pr_info(MPDEC_TAG"[DEBUG] rq: %u, new_state: %i | Mask=[%d%d%d%d]\n",
-			rq_depth, new_state, cpu_online(0), cpu_online(1), cpu_online(2), cpu_online(3));
+	pr_info(MPDEC_TAG"[DEBUG] rq: %u, new_state: %i | Mask=[%d%d]\n",
+			rq_depth, new_state, cpu_online(0), cpu_online(1));
 #endif
 	return new_state;
 }
@@ -584,8 +582,8 @@ static void msm_mpdec_resume(struct work_struct * msm_mpdec_suspend_work) {
 					mpdec_cpu_down(cpu);
 			}
 		}
-		pr_info(MPDEC_TAG"Screen -> on. Activated mpdecision. | Mask=[%d%d%d%d]\n",
-				cpu_online(0), cpu_online(1), cpu_online(2), cpu_online(3));
+		pr_info(MPDEC_TAG"Screen -> on. Activated mpdecision. | Mask=[%d%d]\n",
+				cpu_online(0), cpu_online(1));
 	} else {
 		pr_info(MPDEC_TAG"Screen -> on\n");
 	}
@@ -669,10 +667,6 @@ show_one_twts(twts_threshold_0, 0);
 show_one_twts(twts_threshold_1, 1);
 show_one_twts(twts_threshold_2, 2);
 show_one_twts(twts_threshold_3, 3);
-show_one_twts(twts_threshold_4, 4);
-show_one_twts(twts_threshold_5, 5);
-show_one_twts(twts_threshold_6, 6);
-show_one_twts(twts_threshold_7, 7);
 
 #define store_one_twts(file_name, arraypos)				\
 static ssize_t store_##file_name					\
@@ -691,10 +685,6 @@ store_one_twts(twts_threshold_0, 0);
 store_one_twts(twts_threshold_1, 1);
 store_one_twts(twts_threshold_2, 2);
 store_one_twts(twts_threshold_3, 3);
-store_one_twts(twts_threshold_4, 4);
-store_one_twts(twts_threshold_5, 5);
-store_one_twts(twts_threshold_6, 6);
-store_one_twts(twts_threshold_7, 7);
 
 #define show_one_nwns(file_name, arraypos)				\
 static ssize_t show_##file_name						\
@@ -706,10 +696,6 @@ show_one_nwns(nwns_threshold_0, 0);
 show_one_nwns(nwns_threshold_1, 1);
 show_one_nwns(nwns_threshold_2, 2);
 show_one_nwns(nwns_threshold_3, 3);
-show_one_nwns(nwns_threshold_4, 4);
-show_one_nwns(nwns_threshold_5, 5);
-show_one_nwns(nwns_threshold_6, 6);
-show_one_nwns(nwns_threshold_7, 7);
 
 #define store_one_nwns(file_name, arraypos)				\
 static ssize_t store_##file_name					\
@@ -728,10 +714,6 @@ store_one_nwns(nwns_threshold_0, 0);
 store_one_nwns(nwns_threshold_1, 1);
 store_one_nwns(nwns_threshold_2, 2);
 store_one_nwns(nwns_threshold_3, 3);
-store_one_nwns(nwns_threshold_4, 4);
-store_one_nwns(nwns_threshold_5, 5);
-store_one_nwns(nwns_threshold_6, 6);
-store_one_nwns(nwns_threshold_7, 7);
 
 static ssize_t show_idle_freq (struct kobject *kobj, struct attribute *attr,
 				char *buf)
@@ -1020,18 +1002,10 @@ static struct attribute *msm_mpdec_attributes[] = {
 	&twts_threshold_1.attr,
 	&twts_threshold_2.attr,
 	&twts_threshold_3.attr,
-	&twts_threshold_4.attr,
-	&twts_threshold_5.attr,
-	&twts_threshold_6.attr,
-	&twts_threshold_7.attr,
 	&nwns_threshold_0.attr,
 	&nwns_threshold_1.attr,
 	&nwns_threshold_2.attr,
 	&nwns_threshold_3.attr,
-	&nwns_threshold_4.attr,
-	&nwns_threshold_5.attr,
-	&nwns_threshold_6.attr,
-	&nwns_threshold_7.attr,
 #ifdef CONFIG_MSM_MPDEC_INPUTBOOST_CPUMIN
 	&boost_freqs.attr,
 	&boost_enabled.attr,
