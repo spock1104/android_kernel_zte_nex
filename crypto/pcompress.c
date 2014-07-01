@@ -55,7 +55,7 @@ static int crypto_pcomp_report(struct sk_buff *skb, struct crypto_alg *alg)
 
 	snprintf(rpcomp.type, CRYPTO_MAX_ALG_NAME, "%s", "pcomp");
 
-	NLA_PUT(skb, CRYPTOCFGA_REPORT_COMPRESS,
+	nla_put(skb, CRYPTOCFGA_REPORT_COMPRESS,
 		sizeof(struct crypto_report_comp), &rpcomp);
 
 	return 0;

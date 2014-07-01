@@ -733,23 +733,23 @@ static int u32_dump(struct tcf_proto *tp, unsigned long fh,
 		struct tc_u_hnode *ht = (struct tc_u_hnode *)fh;
 		u32 divisor = ht->divisor + 1;
 
-		NLA_PUT_U32(skb, TCA_U32_DIVISOR, divisor);
+		nla_put_u32(skb, TCA_U32_DIVISOR, divisor);
 	} else {
-		NLA_PUT(skb, TCA_U32_SEL,
+		nla_put(skb, TCA_U32_SEL,
 			sizeof(n->sel) + n->sel.nkeys*sizeof(struct tc_u32_key),
 			&n->sel);
 		if (n->ht_up) {
 			u32 htid = n->handle & 0xFFFFF000;
-			NLA_PUT_U32(skb, TCA_U32_HASH, htid);
+			nla_put_u32(skb, TCA_U32_HASH, htid);
 		}
 		if (n->res.classid)
-			NLA_PUT_U32(skb, TCA_U32_CLASSID, n->res.classid);
+			nla_put_u32(skb, TCA_U32_CLASSID, n->res.classid);
 		if (n->ht_down)
-			NLA_PUT_U32(skb, TCA_U32_LINK, n->ht_down->handle);
+			nla_put_u32(skb, TCA_U32_LINK, n->ht_down->handle);
 
 #ifdef CONFIG_CLS_U32_MARK
 		if (n->mark.val || n->mark.mask)
-			NLA_PUT(skb, TCA_U32_MARK, sizeof(n->mark), &n->mark);
+			nla_put(skb, TCA_U32_MARK, sizeof(n->mark), &n->mark);
 #endif
 
 		if (tcf_exts_dump(skb, &n->exts, &u32_ext_map) < 0)
@@ -757,10 +757,10 @@ static int u32_dump(struct tcf_proto *tp, unsigned long fh,
 
 #ifdef CONFIG_NET_CLS_IND
 		if (strlen(n->indev))
-			NLA_PUT_STRING(skb, TCA_U32_INDEV, n->indev);
+			nla_put_string(skb, TCA_U32_INDEV, n->indev);
 #endif
 #ifdef CONFIG_CLS_U32_PERF
-		NLA_PUT(skb, TCA_U32_PCNT,
+		nla_put(skb, TCA_U32_PCNT,
 		sizeof(struct tc_u32_pcnt) + n->sel.nkeys*sizeof(u64),
 			n->pf);
 #endif

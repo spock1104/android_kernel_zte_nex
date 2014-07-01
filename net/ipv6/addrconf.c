@@ -3997,13 +3997,13 @@ static int inet6_fill_ifla6_attrs(struct sk_buff *skb, struct inet6_dev *idev)
 	struct nlattr *nla;
 	struct ifla_cacheinfo ci;
 
-	NLA_PUT_U32(skb, IFLA_INET6_FLAGS, idev->if_flags);
+	nla_put_u32(skb, IFLA_INET6_FLAGS, idev->if_flags);
 
 	ci.max_reasm_len = IPV6_MAXPLEN;
 	ci.tstamp = cstamp_delta(idev->tstamp);
 	ci.reachable_time = jiffies_to_msecs(idev->nd_parms->reachable_time);
 	ci.retrans_time = jiffies_to_msecs(idev->nd_parms->retrans_time);
-	NLA_PUT(skb, IFLA_INET6_CACHEINFO, sizeof(ci), &ci);
+	nla_put(skb, IFLA_INET6_CACHEINFO, sizeof(ci), &ci);
 
 	nla = nla_reserve(skb, IFLA_INET6_CONF, DEVCONF_MAX * sizeof(s32));
 	if (nla == NULL)
@@ -4069,14 +4069,14 @@ static int inet6_fill_ifinfo(struct sk_buff *skb, struct inet6_dev *idev,
 	hdr->ifi_flags = dev_get_flags(dev);
 	hdr->ifi_change = 0;
 
-	NLA_PUT_STRING(skb, IFLA_IFNAME, dev->name);
+	nla_put_string(skb, IFLA_IFNAME, dev->name);
 
 	if (dev->addr_len)
-		NLA_PUT(skb, IFLA_ADDRESS, dev->addr_len, dev->dev_addr);
+		nla_put(skb, IFLA_ADDRESS, dev->addr_len, dev->dev_addr);
 
-	NLA_PUT_U32(skb, IFLA_MTU, dev->mtu);
+	nla_put_u32(skb, IFLA_MTU, dev->mtu);
 	if (dev->ifindex != dev->iflink)
-		NLA_PUT_U32(skb, IFLA_LINK, dev->iflink);
+		nla_put_u32(skb, IFLA_LINK, dev->iflink);
 
 	protoinfo = nla_nest_start(skb, IFLA_PROTINFO);
 	if (protoinfo == NULL)
@@ -4190,11 +4190,11 @@ static int inet6_fill_prefix(struct sk_buff *skb, struct inet6_dev *idev,
 	if (pinfo->autoconf)
 		pmsg->prefix_flags |= IF_PREFIX_AUTOCONF;
 
-	NLA_PUT(skb, PREFIX_ADDRESS, sizeof(pinfo->prefix), &pinfo->prefix);
+	nla_put(skb, PREFIX_ADDRESS, sizeof(pinfo->prefix), &pinfo->prefix);
 
 	ci.preferred_time = ntohl(pinfo->prefered);
 	ci.valid_time = ntohl(pinfo->valid);
-	NLA_PUT(skb, PREFIX_CACHEINFO, sizeof(ci), &ci);
+	nla_put(skb, PREFIX_CACHEINFO, sizeof(ci), &ci);
 
 	return nlmsg_end(skb, nlh);
 

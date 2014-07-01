@@ -166,11 +166,11 @@ static int vlan_fill_info(struct sk_buff *skb, const struct net_device *dev)
 	struct nlattr *nest;
 	unsigned int i;
 
-	NLA_PUT_U16(skb, IFLA_VLAN_ID, vlan_dev_priv(dev)->vlan_id);
+	nla_put_u16(skb, IFLA_VLAN_ID, vlan_dev_priv(dev)->vlan_id);
 	if (vlan->flags) {
 		f.flags = vlan->flags;
 		f.mask  = ~0;
-		NLA_PUT(skb, IFLA_VLAN_FLAGS, sizeof(f), &f);
+		nla_put(skb, IFLA_VLAN_FLAGS, sizeof(f), &f);
 	}
 	if (vlan->nr_ingress_mappings) {
 		nest = nla_nest_start(skb, IFLA_VLAN_INGRESS_QOS);
@@ -183,7 +183,7 @@ static int vlan_fill_info(struct sk_buff *skb, const struct net_device *dev)
 
 			m.from = i;
 			m.to   = vlan->ingress_priority_map[i];
-			NLA_PUT(skb, IFLA_VLAN_QOS_MAPPING,
+			nla_put(skb, IFLA_VLAN_QOS_MAPPING,
 				sizeof(m), &m);
 		}
 		nla_nest_end(skb, nest);
@@ -202,7 +202,7 @@ static int vlan_fill_info(struct sk_buff *skb, const struct net_device *dev)
 
 				m.from = pm->priority;
 				m.to   = (pm->vlan_qos >> 13) & 0x7;
-				NLA_PUT(skb, IFLA_VLAN_QOS_MAPPING,
+				nla_put(skb, IFLA_VLAN_QOS_MAPPING,
 					sizeof(m), &m);
 			}
 		}

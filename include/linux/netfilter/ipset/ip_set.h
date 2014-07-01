@@ -411,23 +411,23 @@ ip_set_get_h16(const struct nlattr *attr)
 #define ipset_nest_start(skb, attr) nla_nest_start(skb, attr | NLA_F_NESTED)
 #define ipset_nest_end(skb, start)  nla_nest_end(skb, start)
 
-#define NLA_PUT_IPADDR4(skb, type, ipaddr)			\
+#define nla_put_ipaddr4(skb, type, ipaddr)			\
 do {								\
 	struct nlattr *__nested = ipset_nest_start(skb, type);	\
 								\
 	if (!__nested)						\
 		goto nla_put_failure;				\
-	NLA_PUT_NET32(skb, IPSET_ATTR_IPADDR_IPV4, ipaddr);	\
+	nla_put_net32(skb, IPSET_ATTR_IPADDR_IPV4, ipaddr);	\
 	ipset_nest_end(skb, __nested);				\
 } while (0)
 
-#define NLA_PUT_IPADDR6(skb, type, ipaddrptr)			\
+#define nla_put_ipaddr6(skb, type, ipaddrptr)			\
 do {								\
 	struct nlattr *__nested = ipset_nest_start(skb, type);	\
 								\
 	if (!__nested)						\
 		goto nla_put_failure;				\
-	NLA_PUT(skb, IPSET_ATTR_IPADDR_IPV6,			\
+	nla_put(skb, IPSET_ATTR_IPADDR_IPV6,			\
 		sizeof(struct in6_addr), ipaddrptr);		\
 	ipset_nest_end(skb, __nested);				\
 } while (0)

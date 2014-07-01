@@ -125,7 +125,7 @@ int ibnl_put_attr(struct sk_buff *skb, struct nlmsghdr *nlh,
 	unsigned char *prev_tail;
 
 	prev_tail = skb_tail_pointer(skb);
-	NLA_PUT(skb, type, len, data);
+	nla_put(skb, type, len, data);
 	nlh->nlmsg_len += skb_tail_pointer(skb) - prev_tail;
 	return 0;
 

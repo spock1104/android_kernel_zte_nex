@@ -1248,7 +1248,7 @@ static int team_nl_fill_options_get(struct sk_buff *skb,
 	if (IS_ERR(hdr))
 		return PTR_ERR(hdr);
 
-	NLA_PUT_U32(skb, TEAM_ATTR_TEAM_IFINDEX, team->dev->ifindex);
+	nla_put_u32(skb, TEAM_ATTR_TEAM_IFINDEX, team->dev->ifindex);
 	option_list = nla_nest_start(skb, TEAM_ATTR_LIST_OPTION);
 	if (!option_list)
 		return -EMSGSIZE;
@@ -1263,23 +1263,23 @@ static int team_nl_fill_options_get(struct sk_buff *skb,
 		option_item = nla_nest_start(skb, TEAM_ATTR_ITEM_OPTION);
 		if (!option_item)
 			goto nla_put_failure;
-		NLA_PUT_STRING(skb, TEAM_ATTR_OPTION_NAME, option->name);
+		nla_put_string(skb, TEAM_ATTR_OPTION_NAME, option->name);
 		if (option->changed) {
-			NLA_PUT_FLAG(skb, TEAM_ATTR_OPTION_CHANGED);
+			nla_put_flag(skb, TEAM_ATTR_OPTION_CHANGED);
 			option->changed = false;
 		}
 		if (option->removed)
-			NLA_PUT_FLAG(skb, TEAM_ATTR_OPTION_REMOVED);
+			nla_put_flag(skb, TEAM_ATTR_OPTION_REMOVED);
 		switch (option->type) {
 		case TEAM_OPTION_TYPE_U32:
-			NLA_PUT_U8(skb, TEAM_ATTR_OPTION_TYPE, NLA_U32);
+			nla_put_u8(skb, TEAM_ATTR_OPTION_TYPE, NLA_U32);
 			team_option_get(team, option, &arg);
-			NLA_PUT_U32(skb, TEAM_ATTR_OPTION_DATA, arg);
+			nla_put_u32(skb, TEAM_ATTR_OPTION_DATA, arg);
 			break;
 		case TEAM_OPTION_TYPE_STRING:
-			NLA_PUT_U8(skb, TEAM_ATTR_OPTION_TYPE, NLA_STRING);
+			nla_put_u8(skb, TEAM_ATTR_OPTION_TYPE, NLA_STRING);
 			team_option_get(team, option, &arg);
-			NLA_PUT_STRING(skb, TEAM_ATTR_OPTION_DATA,
+			nla_put_string(skb, TEAM_ATTR_OPTION_DATA,
 				       (char *) arg);
 			break;
 		default:
@@ -1420,7 +1420,7 @@ static int team_nl_fill_port_list_get(struct sk_buff *skb,
 	if (IS_ERR(hdr))
 		return PTR_ERR(hdr);
 
-	NLA_PUT_U32(skb, TEAM_ATTR_TEAM_IFINDEX, team->dev->ifindex);
+	nla_put_u32(skb, TEAM_ATTR_TEAM_IFINDEX, team->dev->ifindex);
 	port_list = nla_nest_start(skb, TEAM_ATTR_LIST_PORT);
 	if (!port_list)
 		return -EMSGSIZE;
@@ -1434,17 +1434,17 @@ static int team_nl_fill_port_list_get(struct sk_buff *skb,
 		port_item = nla_nest_start(skb, TEAM_ATTR_ITEM_PORT);
 		if (!port_item)
 			goto nla_put_failure;
-		NLA_PUT_U32(skb, TEAM_ATTR_PORT_IFINDEX, port->dev->ifindex);
+		nla_put_u32(skb, TEAM_ATTR_PORT_IFINDEX, port->dev->ifindex);
 		if (port->changed) {
-			NLA_PUT_FLAG(skb, TEAM_ATTR_PORT_CHANGED);
+			nla_put_flag(skb, TEAM_ATTR_PORT_CHANGED);
 			port->changed = false;
 		}
 		if (port->removed)
-			NLA_PUT_FLAG(skb, TEAM_ATTR_PORT_REMOVED);
+			nla_put_flag(skb, TEAM_ATTR_PORT_REMOVED);
 		if (port->linkup)
-			NLA_PUT_FLAG(skb, TEAM_ATTR_PORT_LINKUP);
-		NLA_PUT_U32(skb, TEAM_ATTR_PORT_SPEED, port->speed);
-		NLA_PUT_U8(skb, TEAM_ATTR_PORT_DUPLEX, port->duplex);
+			nla_put_flag(skb, TEAM_ATTR_PORT_LINKUP);
+		nla_put_u32(skb, TEAM_ATTR_PORT_SPEED, port->speed);
+		nla_put_u8(skb, TEAM_ATTR_PORT_DUPLEX, port->duplex);
 		nla_nest_end(skb, port_item);
 	}
 
@@ -1526,8 +1526,8 @@ static int team_nl_send_event_options_get(struct team *team)
 	if (err < 0)
 		goto err_fill;
 
-	err = genlmsg_multicast_netns(net, skb, 0, team_change_event_mcgrp.id,
-				      GFP_KERNEL);
+	err = genlmsg_multicast_netns(dev_net(team->dev),
+				       skb, 0, 0, GFP_KERNEL);
 	return err;
 
 err_fill:
@@ -1549,8 +1549,8 @@ static int team_nl_send_event_port_list_get(struct team *team)
 	if (err < 0)
 		goto err_fill;
 
-	err = genlmsg_multicast_netns(net, skb, 0, team_change_event_mcgrp.id,
-				      GFP_KERNEL);
+	err = genlmsg_multicast_netns(dev_net(team->dev),
+				       skb, 0, 0, GFP_KERNEL);
 	return err;
 
 err_fill:

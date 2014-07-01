@@ -601,7 +601,7 @@ static int atm_tc_dump_class(struct Qdisc *sch, unsigned long cl,
 	if (nest == NULL)
 		goto nla_put_failure;
 
-	NLA_PUT(skb, TCA_ATM_HDR, flow->hdr_len, flow->hdr);
+	nla_put(skb, TCA_ATM_HDR, flow->hdr_len, flow->hdr);
 	if (flow->vcc) {
 		struct sockaddr_atmpvc pvc;
 		int state;
@@ -610,14 +610,14 @@ static int atm_tc_dump_class(struct Qdisc *sch, unsigned long cl,
 		pvc.sap_addr.itf = flow->vcc->dev ? flow->vcc->dev->number : -1;
 		pvc.sap_addr.vpi = flow->vcc->vpi;
 		pvc.sap_addr.vci = flow->vcc->vci;
-		NLA_PUT(skb, TCA_ATM_ADDR, sizeof(pvc), &pvc);
+		nla_put(skb, TCA_ATM_ADDR, sizeof(pvc), &pvc);
 		state = ATM_VF2VS(flow->vcc->flags);
-		NLA_PUT_U32(skb, TCA_ATM_STATE, state);
+		nla_put_u32(skb, TCA_ATM_STATE, state);
 	}
 	if (flow->excess)
-		NLA_PUT_U32(skb, TCA_ATM_EXCESS, flow->classid);
+		nla_put_u32(skb, TCA_ATM_EXCESS, flow->classid);
 	else
-		NLA_PUT_U32(skb, TCA_ATM_EXCESS, 0);
+		nla_put_u32(skb, TCA_ATM_EXCESS, 0);
 
 	nla_nest_end(skb, nest);
 	return skb->len;

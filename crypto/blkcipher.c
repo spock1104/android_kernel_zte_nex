@@ -508,7 +508,7 @@ static int crypto_blkcipher_report(struct sk_buff *skb, struct crypto_alg *alg)
 	rblkcipher.max_keysize = alg->cra_blkcipher.max_keysize;
 	rblkcipher.ivsize = alg->cra_blkcipher.ivsize;
 
-	NLA_PUT(skb, CRYPTOCFGA_REPORT_BLKCIPHER,
+	nla_put(skb, CRYPTOCFGA_REPORT_BLKCIPHER,
 		sizeof(struct crypto_report_blkcipher), &rblkcipher);
 
 	return 0;

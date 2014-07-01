@@ -278,9 +278,9 @@ static struct nf_hook_ops ipv6_conntrack_ops[] __read_mostly = {
 static int ipv6_tuple_to_nlattr(struct sk_buff *skb,
 				const struct nf_conntrack_tuple *tuple)
 {
-	NLA_PUT(skb, CTA_IP_V6_SRC, sizeof(u_int32_t) * 4,
+	nla_put(skb, CTA_IP_V6_SRC, sizeof(u_int32_t) * 4,
 		&tuple->src.u3.ip6);
-	NLA_PUT(skb, CTA_IP_V6_DST, sizeof(u_int32_t) * 4,
+	nla_put(skb, CTA_IP_V6_DST, sizeof(u_int32_t) * 4,
 		&tuple->dst.u3.ip6);
 	return 0;
 

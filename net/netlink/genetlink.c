@@ -635,11 +635,11 @@ static int ctrl_fill_info(struct genl_family *family, u32 pid, u32 seq,
 	if (hdr == NULL)
 		return -1;
 
-	NLA_PUT_STRING(skb, CTRL_ATTR_FAMILY_NAME, family->name);
-	NLA_PUT_U16(skb, CTRL_ATTR_FAMILY_ID, family->id);
-	NLA_PUT_U32(skb, CTRL_ATTR_VERSION, family->version);
-	NLA_PUT_U32(skb, CTRL_ATTR_HDRSIZE, family->hdrsize);
-	NLA_PUT_U32(skb, CTRL_ATTR_MAXATTR, family->maxattr);
+	nla_put_string(skb, CTRL_ATTR_FAMILY_NAME, family->name);
+	nla_put_u16(skb, CTRL_ATTR_FAMILY_ID, family->id);
+	nla_put_u32(skb, CTRL_ATTR_VERSION, family->version);
+	nla_put_u32(skb, CTRL_ATTR_HDRSIZE, family->hdrsize);
+	nla_put_u32(skb, CTRL_ATTR_MAXATTR, family->maxattr);
 
 	if (!list_empty(&family->ops_list)) {
 		struct nlattr *nla_ops;
@@ -657,8 +657,8 @@ static int ctrl_fill_info(struct genl_family *family, u32 pid, u32 seq,
 			if (nest == NULL)
 				goto nla_put_failure;
 
-			NLA_PUT_U32(skb, CTRL_ATTR_OP_ID, ops->cmd);
-			NLA_PUT_U32(skb, CTRL_ATTR_OP_FLAGS, ops->flags);
+			nla_put_u32(skb, CTRL_ATTR_OP_ID, ops->cmd);
+			nla_put_u32(skb, CTRL_ATTR_OP_FLAGS, ops->flags);
 
 			nla_nest_end(skb, nest);
 		}
@@ -682,8 +682,8 @@ static int ctrl_fill_info(struct genl_family *family, u32 pid, u32 seq,
 			if (nest == NULL)
 				goto nla_put_failure;
 
-			NLA_PUT_U32(skb, CTRL_ATTR_MCAST_GRP_ID, grp->id);
-			NLA_PUT_STRING(skb, CTRL_ATTR_MCAST_GRP_NAME,
+			nla_put_u32(skb, CTRL_ATTR_MCAST_GRP_ID, grp->id);
+			nla_put_string(skb, CTRL_ATTR_MCAST_GRP_NAME,
 				       grp->name);
 
 			nla_nest_end(skb, nest);
@@ -710,8 +710,8 @@ static int ctrl_fill_mcgrp_info(struct genl_multicast_group *grp, u32 pid,
 	if (hdr == NULL)
 		return -1;
 
-	NLA_PUT_STRING(skb, CTRL_ATTR_FAMILY_NAME, grp->family->name);
-	NLA_PUT_U16(skb, CTRL_ATTR_FAMILY_ID, grp->family->id);
+	nla_put_string(skb, CTRL_ATTR_FAMILY_NAME, grp->family->name);
+	nla_put_u16(skb, CTRL_ATTR_FAMILY_ID, grp->family->id);
 
 	nla_grps = nla_nest_start(skb, CTRL_ATTR_MCAST_GROUPS);
 	if (nla_grps == NULL)
@@ -721,8 +721,8 @@ static int ctrl_fill_mcgrp_info(struct genl_multicast_group *grp, u32 pid,
 	if (nest == NULL)
 		goto nla_put_failure;
 
-	NLA_PUT_U32(skb, CTRL_ATTR_MCAST_GRP_ID, grp->id);
-	NLA_PUT_STRING(skb, CTRL_ATTR_MCAST_GRP_NAME,
+	nla_put_u32(skb, CTRL_ATTR_MCAST_GRP_ID, grp->id);
+	nla_put_string(skb, CTRL_ATTR_MCAST_GRP_NAME,
 		       grp->name);
 
 	nla_nest_end(skb, nest);
@@ -887,7 +887,7 @@ static int genl_ctrl_event(int event, void *data)
 
 	if (!family->netnsok) {
 		genlmsg_multicast_netns(&init_net, msg, 0,
-					GENL_ID_CTRL, GFP_KERNEL);
+					0, GFP_KERNEL);
 	} else {
 		rcu_read_lock();
 		genlmsg_multicast_allns(msg, 0, GENL_ID_CTRL, GFP_ATOMIC);

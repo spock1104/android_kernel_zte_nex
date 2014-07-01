@@ -482,13 +482,13 @@ static int sctp_to_nlattr(struct sk_buff *skb, struct nlattr *nla,
 	if (!nest_parms)
 		goto nla_put_failure;
 
-	NLA_PUT_U8(skb, CTA_PROTOINFO_SCTP_STATE, ct->proto.sctp.state);
+	nla_put_u8(skb, CTA_PROTOINFO_SCTP_STATE, ct->proto.sctp.state);
 
-	NLA_PUT_BE32(skb,
+	nla_put_be32(skb,
 		     CTA_PROTOINFO_SCTP_VTAG_ORIGINAL,
 		     ct->proto.sctp.vtag[IP_CT_DIR_ORIGINAL]);
 
-	NLA_PUT_BE32(skb,
+	nla_put_be32(skb,
 		     CTA_PROTOINFO_SCTP_VTAG_REPLY,
 		     ct->proto.sctp.vtag[IP_CT_DIR_REPLY]);
 
@@ -579,7 +579,7 @@ sctp_timeout_obj_to_nlattr(struct sk_buff *skb, const void *data)
 	int i;
 
 	for (i=CTA_TIMEOUT_SCTP_UNSPEC+1; i<CTA_TIMEOUT_SCTP_MAX+1; i++)
-	        NLA_PUT_BE32(skb, i, htonl(timeouts[i] / HZ));
+	        nla_put_be32(skb, i, htonl(timeouts[i] / HZ));
 
         return 0;
 

@@ -269,7 +269,7 @@ static int prio_dump(struct Qdisc *sch, struct sk_buff *skb)
 	opt.enable_flow = q->enable_flow;
 	memcpy(&opt.priomap, q->prio2band, TC_PRIO_MAX + 1);
 
-	NLA_PUT(skb, TCA_OPTIONS, sizeof(opt), &opt);
+	nla_put(skb, TCA_OPTIONS, sizeof(opt), &opt);
 
 	return skb->len;
 
