@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2012-2013 The Linux Foundation. All rights reserved.
  *
  * Previously licensed under the ISC license by Qualcomm Atheros, Inc.
  *
@@ -19,14 +19,18 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
+/*
+ * This file was originally distributed by Qualcomm Atheros, Inc.
+ * under proprietary terms before Copyright ownership was assigned
+ * to the Linux Foundation.
+ */
+
 /******************************************************************************
 *
 * Name:  wlan_hdd_packet_filtering.h
 *
 * Description: Packet Filter Definitions.
 *
-* Copyright (c) 2011 Qualcomm Technologies, Inc. All Rights Reserved.
-* Qualcomm Technologies Proprietary and Confidential.
 *
 ******************************************************************************/
 
@@ -36,10 +40,20 @@
 
 
 #ifdef WLAN_FEATURE_PACKET_FILTERING
-#define HDD_MAX_CMP_PER_PACKET_FILTER     5
 
-#define HDD_WLAN_MAC_ADDR_LEN    6
-#define HDD_MAX_NUM_MULTICAST_ADDRESS   10
+#define HDD_MAX_CMP_PER_PACKET_FILTER     5
+#define HDD_FILTER_IPV6_MC_UC             1
+#define HDD_FILTER_IPV6_MC                0
+#define HDD_FILTER_ID_IPV6_MC             10
+#define HDD_FILTER_ID_IPV6_UC             11
+
+#define HDD_IPV6_MC_CMP_DATA              0x33
+#define HDD_IPV6_UC_CMP_DATA              0x01
+#define HDD_IPV6_CMP_DATA_0               0x86
+#define HDD_IPV6_CMP_DATA_1               0xDD
+
+#define HDD_WLAN_MAC_ADDR_LEN             6
+#define HDD_MAX_NUM_MULTICAST_ADDRESS     10
 
 typedef enum
 {

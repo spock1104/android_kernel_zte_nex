@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2012-2013 The Linux Foundation. All rights reserved.
  *
  * Previously licensed under the ISC license by Qualcomm Atheros, Inc.
  *
@@ -18,29 +18,15 @@
  * TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
  * PERFORMANCE OF THIS SOFTWARE.
  */
+
 /*
- * Copyright (c) 2012, The Linux Foundation. All rights reserved.
- *
- * Previously licensed under the ISC license by Qualcomm Atheros, Inc.
- *
- *
- * Permission to use, copy, modify, and/or distribute this software for
- * any purpose with or without fee is hereby granted, provided that the
- * above copyright notice and this permission notice appear in all
- * copies.
- *
- * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL
- * WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE
- * AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL
- * DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR
- * PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
- * TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
- * PERFORMANCE OF THIS SOFTWARE.
+ * This file was originally distributed by Qualcomm Atheros, Inc.
+ * under proprietary terms before Copyright ownership was assigned
+ * to the Linux Foundation.
  */
+
 /*
  *
- * Airgo Networks, Inc proprietary. All rights reserved.
  * This file limGlobal.h contains the definitions exported by
  * LIM module.
  * Author:        Chandra Modumudi
@@ -62,9 +48,7 @@
 #include "wniCfgSta.h"
 #include "csrApi.h"
 #include "sapApi.h"
-#ifdef FEATURE_WLAN_TDLS
 #include "dot11f.h"
-#endif
 
 /// Maximum number of scan hash table entries
 #define LIM_MAX_NUM_OF_SCAN_RESULTS 256
@@ -101,6 +85,8 @@
 
 #define GET_TIM_WAIT_COUNT(LIntrvl)        ((LIntrvl * LIM_TIM_WAIT_COUNT_FACTOR) > LIM_MIN_TIM_WAIT_COUNT ? \
                                                                     (LIntrvl * LIM_TIM_WAIT_COUNT_FACTOR) : LIM_MIN_TIM_WAIT_COUNT)
+#define IS_5G_BAND(__rfBand)     ((__rfBand & 0x3) == 0x2)
+#define IS_24G_BAND(__rfBand)    ((__rfBand & 0x3) == 0x1)
 
 // enums exported by LIM are as follows
 
@@ -115,7 +101,7 @@ typedef enum eLimSystemRole
     eLIM_BT_AMP_AP_ROLE,
     eLIM_P2P_DEVICE_ROLE,
     eLIM_P2P_DEVICE_GO,
-    eLIM_P2P_DEVICE_CLINET
+    eLIM_P2P_DEVICE_CLIENT
 } tLimSystemRole;
 
 /**
@@ -503,7 +489,9 @@ struct tLimIbssPeerNode
     tANI_U8                       wmeEdcaPresent:1;
     tANI_U8                       wmeInfoPresent:1;
     tANI_U8                       htCapable:1;
-    tANI_U8                       rsvd:2;
+    tANI_U8                       vhtCapable:1;
+    tANI_U8                       rsvd:1;
+    tANI_U8                       htSecondaryChannelOffset;
     tSirMacCapabilityInfo    capabilityInfo;
     tSirMacRateSet           supportedRates;
     tSirMacRateSet           extendedRates;
@@ -555,7 +543,12 @@ struct tLimIbssPeerNode
 
     tANI_U8 *beacon; //Hold beacon to be sent to HDD/CSR
     tANI_U16 beaconLen;
-    
+
+#ifdef WLAN_FEATURE_11AC
+    tDot11fIEVHTCaps VHTCaps;
+    tANI_U8 vhtSupportedChannelWidthSet;
+    tANI_U8 vhtBeamFormerCapable;
+#endif
 };
 
 // Enums used for channel switching.
@@ -661,7 +654,7 @@ typedef struct sLimWscIeInfo
 } tLimWscIeInfo, *tpLimWscIeInfo;
 
 // maximum number of tspec's supported
-#define LIM_NUM_TSPEC_MAX      4
+#define LIM_NUM_TSPEC_MAX      15
 
 
 //structure to hold all 11h specific data
