@@ -409,7 +409,7 @@ static int crypto_ahash_report(struct sk_buff *skb, struct crypto_alg *alg)
 	rhash.blocksize = alg->cra_blocksize;
 	rhash.digestsize = __crypto_hash_alg_common(alg)->digestsize;
 
-	NLA_PUT(skb, CRYPTOCFGA_REPORT_HASH,
+	nla_put(skb, CRYPTOCFGA_REPORT_HASH,
 		sizeof(struct crypto_report_hash), &rhash);
 
 	return 0;

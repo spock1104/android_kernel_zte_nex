@@ -208,10 +208,11 @@ static inline void genlmsg_cancel(struct sk_buff *skb, void *hdr)
 
 /**
  * genlmsg_multicast_netns - multicast a netlink message to a specific netns
+ * @family: the generic netlink family
  * @net: the net namespace
  * @skb: netlink message as socket buffer
- * @pid: own netlink pid to avoid sending to yourself
- * @group: multicast group id
+ * @portid: own netlink portid to avoid sending to yourself
+ * @group: offset of multicast group in groups array
  * @flags: allocation flags
  */
 static inline int genlmsg_multicast_netns(struct net *net, struct sk_buff *skb,

@@ -1051,7 +1051,7 @@ static int htb_dump(struct Qdisc *sch, struct sk_buff *skb)
 	nest = nla_nest_start(skb, TCA_OPTIONS);
 	if (nest == NULL)
 		goto nla_put_failure;
-	NLA_PUT(skb, TCA_HTB_INIT, sizeof(gopt), &gopt);
+	nla_put(skb, TCA_HTB_INIT, sizeof(gopt), &gopt);
 	nla_nest_end(skb, nest);
 
 	spin_unlock_bh(root_lock);
@@ -1090,7 +1090,7 @@ static int htb_dump_class(struct Qdisc *sch, unsigned long arg,
 	opt.quantum = cl->quantum;
 	opt.prio = cl->prio;
 	opt.level = cl->level;
-	NLA_PUT(skb, TCA_HTB_PARMS, sizeof(opt), &opt);
+	nla_put(skb, TCA_HTB_PARMS, sizeof(opt), &opt);
 
 	nla_nest_end(skb, nest);
 	spin_unlock_bh(root_lock);

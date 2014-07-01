@@ -402,7 +402,7 @@ static struct nlmsghdr *rtnetlink_ifinfo_prep(struct net_device *dev,
 	r->ifi_flags = dev_get_flags(dev);
 	r->ifi_change = 0;	/* Wireless changes don't affect those flags */
 
-	NLA_PUT_STRING(skb, IFLA_IFNAME, dev->name);
+	nla_put_string(skb, IFLA_IFNAME, dev->name);
 
 	return nlh;
  nla_put_failure:

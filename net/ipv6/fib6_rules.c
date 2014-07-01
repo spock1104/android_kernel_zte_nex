@@ -216,11 +216,11 @@ static int fib6_rule_fill(struct fib_rule *rule, struct sk_buff *skb,
 	frh->tos = rule6->tclass;
 
 	if (rule6->dst.plen)
-		NLA_PUT(skb, FRA_DST, sizeof(struct in6_addr),
+		nla_put(skb, FRA_DST, sizeof(struct in6_addr),
 			&rule6->dst.addr);
 
 	if (rule6->src.plen)
-		NLA_PUT(skb, FRA_SRC, sizeof(struct in6_addr),
+		nla_put(skb, FRA_SRC, sizeof(struct in6_addr),
 			&rule6->src.addr);
 
 	return 0;

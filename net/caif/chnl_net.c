@@ -424,12 +424,12 @@ static int ipcaif_fill_info(struct sk_buff *skb, const struct net_device *dev)
 	struct chnl_net *priv;
 	u8 loop;
 	priv = netdev_priv(dev);
-	NLA_PUT_U32(skb, IFLA_CAIF_IPV4_CONNID,
+	nla_put_u32(skb, IFLA_CAIF_IPV4_CONNID,
 		    priv->conn_req.sockaddr.u.dgm.connection_id);
-	NLA_PUT_U32(skb, IFLA_CAIF_IPV6_CONNID,
+	nla_put_u32(skb, IFLA_CAIF_IPV6_CONNID,
 		    priv->conn_req.sockaddr.u.dgm.connection_id);
 	loop = priv->conn_req.protocol == CAIFPROTO_DATAGRAM_LOOP;
-	NLA_PUT_U8(skb, IFLA_CAIF_LOOPBACK, loop);
+	nla_put_u8(skb, IFLA_CAIF_LOOPBACK, loop);
 
 
 	return 0;

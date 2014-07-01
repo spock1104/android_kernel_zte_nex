@@ -81,7 +81,7 @@ static int crypto_report_cipher(struct sk_buff *skb, struct crypto_alg *alg)
 	rcipher.min_keysize = alg->cra_cipher.cia_min_keysize;
 	rcipher.max_keysize = alg->cra_cipher.cia_max_keysize;
 
-	NLA_PUT(skb, CRYPTOCFGA_REPORT_CIPHER,
+	nla_put(skb, CRYPTOCFGA_REPORT_CIPHER,
 		sizeof(struct crypto_report_cipher), &rcipher);
 
 	return 0;
@@ -96,7 +96,7 @@ static int crypto_report_comp(struct sk_buff *skb, struct crypto_alg *alg)
 
 	snprintf(rcomp.type, CRYPTO_MAX_ALG_NAME, "%s", "compression");
 
-	NLA_PUT(skb, CRYPTOCFGA_REPORT_COMPRESS,
+	nla_put(skb, CRYPTOCFGA_REPORT_COMPRESS,
 		sizeof(struct crypto_report_comp), &rcomp);
 
 	return 0;
@@ -117,14 +117,14 @@ static int crypto_report_one(struct crypto_alg *alg,
 	ualg->cru_flags = alg->cra_flags;
 	ualg->cru_refcnt = atomic_read(&alg->cra_refcnt);
 
-	NLA_PUT_U32(skb, CRYPTOCFGA_PRIORITY_VAL, alg->cra_priority);
+	nla_put_u32(skb, CRYPTOCFGA_PRIORITY_VAL, alg->cra_priority);
 
 	if (alg->cra_flags & CRYPTO_ALG_LARVAL) {
 		struct crypto_report_larval rl;
 
 		snprintf(rl.type, CRYPTO_MAX_ALG_NAME, "%s", "larval");
 
-		NLA_PUT(skb, CRYPTOCFGA_REPORT_LARVAL,
+		nla_put(skb, CRYPTOCFGA_REPORT_LARVAL,
 			sizeof(struct crypto_report_larval), &rl);
 
 		goto out;

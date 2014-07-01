@@ -582,11 +582,11 @@ static void mac80211_hwsim_tx_frame_nl(struct ieee80211_hw *hw,
 		goto nla_put_failure;
 	}
 
-	NLA_PUT(skb, HWSIM_ATTR_ADDR_TRANSMITTER,
+	nla_put(skb, HWSIM_ATTR_ADDR_TRANSMITTER,
 		     sizeof(struct mac_address), data->addresses[1].addr);
 
 	/* We get the skb->data */
-	NLA_PUT(skb, HWSIM_ATTR_FRAME, my_skb->len, my_skb->data);
+	nla_put(skb, HWSIM_ATTR_FRAME, my_skb->len, my_skb->data);
 
 	/* We get the flags for this transmission, and we translate them to
 	   wmediumd flags  */
@@ -597,7 +597,7 @@ static void mac80211_hwsim_tx_frame_nl(struct ieee80211_hw *hw,
 	if (info->flags & IEEE80211_TX_CTL_NO_ACK)
 		hwsim_flags |= HWSIM_TX_CTL_NO_ACK;
 
-	NLA_PUT_U32(skb, HWSIM_ATTR_FLAGS, hwsim_flags);
+	nla_put_u32(skb, HWSIM_ATTR_FLAGS, hwsim_flags);
 
 	/* We get the tx control (rate and retries) info*/
 
@@ -606,12 +606,12 @@ static void mac80211_hwsim_tx_frame_nl(struct ieee80211_hw *hw,
 		tx_attempts[i].count = info->status.rates[i].count;
 	}
 
-	NLA_PUT(skb, HWSIM_ATTR_TX_INFO,
+	nla_put(skb, HWSIM_ATTR_TX_INFO,
 		     sizeof(struct hwsim_tx_rate)*IEEE80211_TX_MAX_RATES,
 		     tx_attempts);
 
 	/* We create a cookie to identify this skb */
-	NLA_PUT_U64(skb, HWSIM_ATTR_COOKIE, (unsigned long) my_skb);
+	nla_put_u64(skb, HWSIM_ATTR_COOKIE, (unsigned long) my_skb);
 
 	genlmsg_end(skb, msg_head);
 	genlmsg_unicast(&init_net, skb, dst_pid);
@@ -1108,7 +1108,7 @@ static int mac80211_hwsim_testmode_cmd(struct ieee80211_hw *hw,
 						nla_total_size(sizeof(u32)));
 		if (!skb)
 			return -ENOMEM;
-		NLA_PUT_U32(skb, HWSIM_TM_ATTR_PS, hwsim->ps);
+		nla_put_u32(skb, HWSIM_TM_ATTR_PS, hwsim->ps);
 		return cfg80211_testmode_reply(skb);
 	default:
 		return -EOPNOTSUPP;

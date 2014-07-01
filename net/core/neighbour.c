@@ -1769,27 +1769,27 @@ static int neightbl_fill_parms(struct sk_buff *skb, struct neigh_parms *parms)
 		return -ENOBUFS;
 
 	if (parms->dev)
-		NLA_PUT_U32(skb, NDTPA_IFINDEX, parms->dev->ifindex);
+		nla_put_u32(skb, NDTPA_IFINDEX, parms->dev->ifindex);
 
-	NLA_PUT_U32(skb, NDTPA_REFCNT, atomic_read(&parms->refcnt));
-	NLA_PUT_U32(skb, NDTPA_QUEUE_LENBYTES, parms->queue_len_bytes);
+	nla_put_u32(skb, NDTPA_REFCNT, atomic_read(&parms->refcnt));
+	nla_put_u32(skb, NDTPA_QUEUE_LENBYTES, parms->queue_len_bytes);
 	/* approximative value for deprecated QUEUE_LEN (in packets) */
-	NLA_PUT_U32(skb, NDTPA_QUEUE_LEN,
+	nla_put_u32(skb, NDTPA_QUEUE_LEN,
 		    DIV_ROUND_UP(parms->queue_len_bytes,
 				 SKB_TRUESIZE(ETH_FRAME_LEN)));
-	NLA_PUT_U32(skb, NDTPA_PROXY_QLEN, parms->proxy_qlen);
-	NLA_PUT_U32(skb, NDTPA_APP_PROBES, parms->app_probes);
-	NLA_PUT_U32(skb, NDTPA_UCAST_PROBES, parms->ucast_probes);
-	NLA_PUT_U32(skb, NDTPA_MCAST_PROBES, parms->mcast_probes);
-	NLA_PUT_MSECS(skb, NDTPA_REACHABLE_TIME, parms->reachable_time);
-	NLA_PUT_MSECS(skb, NDTPA_BASE_REACHABLE_TIME,
+	nla_put_u32(skb, NDTPA_PROXY_QLEN, parms->proxy_qlen);
+	nla_put_u32(skb, NDTPA_APP_PROBES, parms->app_probes);
+	nla_put_u32(skb, NDTPA_UCAST_PROBES, parms->ucast_probes);
+	nla_put_u32(skb, NDTPA_MCAST_PROBES, parms->mcast_probes);
+	nla_put_msecs(skb, NDTPA_REACHABLE_TIME, parms->reachable_time);
+	nla_put_msecs(skb, NDTPA_BASE_REACHABLE_TIME,
 		      parms->base_reachable_time);
-	NLA_PUT_MSECS(skb, NDTPA_GC_STALETIME, parms->gc_staletime);
-	NLA_PUT_MSECS(skb, NDTPA_DELAY_PROBE_TIME, parms->delay_probe_time);
-	NLA_PUT_MSECS(skb, NDTPA_RETRANS_TIME, parms->retrans_time);
-	NLA_PUT_MSECS(skb, NDTPA_ANYCAST_DELAY, parms->anycast_delay);
-	NLA_PUT_MSECS(skb, NDTPA_PROXY_DELAY, parms->proxy_delay);
-	NLA_PUT_MSECS(skb, NDTPA_LOCKTIME, parms->locktime);
+	nla_put_msecs(skb, NDTPA_GC_STALETIME, parms->gc_staletime);
+	nla_put_msecs(skb, NDTPA_DELAY_PROBE_TIME, parms->delay_probe_time);
+	nla_put_msecs(skb, NDTPA_RETRANS_TIME, parms->retrans_time);
+	nla_put_msecs(skb, NDTPA_ANYCAST_DELAY, parms->anycast_delay);
+	nla_put_msecs(skb, NDTPA_PROXY_DELAY, parms->proxy_delay);
+	nla_put_msecs(skb, NDTPA_LOCKTIME, parms->locktime);
 
 	return nla_nest_end(skb, nest);
 
@@ -1815,11 +1815,11 @@ static int neightbl_fill_info(struct sk_buff *skb, struct neigh_table *tbl,
 	ndtmsg->ndtm_pad1   = 0;
 	ndtmsg->ndtm_pad2   = 0;
 
-	NLA_PUT_STRING(skb, NDTA_NAME, tbl->id);
-	NLA_PUT_MSECS(skb, NDTA_GC_INTERVAL, tbl->gc_interval);
-	NLA_PUT_U32(skb, NDTA_THRESH1, tbl->gc_thresh1);
-	NLA_PUT_U32(skb, NDTA_THRESH2, tbl->gc_thresh2);
-	NLA_PUT_U32(skb, NDTA_THRESH3, tbl->gc_thresh3);
+	nla_put_string(skb, NDTA_NAME, tbl->id);
+	nla_put_msecs(skb, NDTA_GC_INTERVAL, tbl->gc_interval);
+	nla_put_u32(skb, NDTA_THRESH1, tbl->gc_thresh1);
+	nla_put_u32(skb, NDTA_THRESH2, tbl->gc_thresh2);
+	nla_put_u32(skb, NDTA_THRESH3, tbl->gc_thresh3);
 
 	{
 		unsigned long now = jiffies;
@@ -1841,7 +1841,7 @@ static int neightbl_fill_info(struct sk_buff *skb, struct neigh_table *tbl,
 		ndc.ndtc_hash_mask = ((1 << nht->hash_shift) - 1);
 		rcu_read_unlock_bh();
 
-		NLA_PUT(skb, NDTA_CONFIG, sizeof(ndc), &ndc);
+		nla_put(skb, NDTA_CONFIG, sizeof(ndc), &ndc);
 	}
 
 	{
@@ -1866,7 +1866,7 @@ static int neightbl_fill_info(struct sk_buff *skb, struct neigh_table *tbl,
 			ndst.ndts_forced_gc_runs	+= st->forced_gc_runs;
 		}
 
-		NLA_PUT(skb, NDTA_STATS, sizeof(ndst), &ndst);
+		nla_put(skb, NDTA_STATS, sizeof(ndst), &ndst);
 	}
 
 	BUG_ON(tbl->parms.dev);
@@ -2137,7 +2137,7 @@ static int neigh_fill_info(struct sk_buff *skb, struct neighbour *neigh,
 	ndm->ndm_type	 = neigh->type;
 	ndm->ndm_ifindex = neigh->dev->ifindex;
 
-	NLA_PUT(skb, NDA_DST, neigh->tbl->key_len, neigh->primary_key);
+	nla_put(skb, NDA_DST, neigh->tbl->key_len, neigh->primary_key);
 
 	read_lock_bh(&neigh->lock);
 	ndm->ndm_state	 = neigh->nud_state;
@@ -2157,8 +2157,8 @@ static int neigh_fill_info(struct sk_buff *skb, struct neighbour *neigh,
 	ci.ndm_refcnt	 = atomic_read(&neigh->refcnt) - 1;
 	read_unlock_bh(&neigh->lock);
 
-	NLA_PUT_U32(skb, NDA_PROBES, atomic_read(&neigh->probes));
-	NLA_PUT(skb, NDA_CACHEINFO, sizeof(ci), &ci);
+	nla_put_u32(skb, NDA_PROBES, atomic_read(&neigh->probes));
+	nla_put(skb, NDA_CACHEINFO, sizeof(ci), &ci);
 
 	return nlmsg_end(skb, nlh);
 
@@ -2187,7 +2187,7 @@ static int pneigh_fill_info(struct sk_buff *skb, struct pneigh_entry *pn,
 	ndm->ndm_ifindex = pn->dev->ifindex;
 	ndm->ndm_state	 = NUD_NONE;
 
-	NLA_PUT(skb, NDA_DST, tbl->key_len, pn->key);
+	nla_put(skb, NDA_DST, tbl->key_len, pn->key);
 
 	return nlmsg_end(skb, nlh);
 

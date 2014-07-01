@@ -125,7 +125,7 @@ static int crypto_aead_report(struct sk_buff *skb, struct crypto_alg *alg)
 	raead.maxauthsize = aead->maxauthsize;
 	raead.ivsize = aead->ivsize;
 
-	NLA_PUT(skb, CRYPTOCFGA_REPORT_AEAD,
+	nla_put(skb, CRYPTOCFGA_REPORT_AEAD,
 		sizeof(struct crypto_report_aead), &raead);
 
 	return 0;
@@ -210,7 +210,7 @@ static int crypto_nivaead_report(struct sk_buff *skb, struct crypto_alg *alg)
 	raead.maxauthsize = aead->maxauthsize;
 	raead.ivsize = aead->ivsize;
 
-	NLA_PUT(skb, CRYPTOCFGA_REPORT_AEAD,
+	nla_put(skb, CRYPTOCFGA_REPORT_AEAD,
 		sizeof(struct crypto_report_aead), &raead);
 
 	return 0;

@@ -1305,7 +1305,7 @@ hfsc_dump_sc(struct sk_buff *skb, int attr, struct internal_sc *sc)
 	tsc.m1 = sm2m(sc->sm1);
 	tsc.d  = dx2d(sc->dx);
 	tsc.m2 = sm2m(sc->sm2);
-	NLA_PUT(skb, attr, sizeof(tsc), &tsc);
+	nla_put(skb, attr, sizeof(tsc), &tsc);
 
 	return skb->len;
 
@@ -1573,7 +1573,7 @@ hfsc_dump_qdisc(struct Qdisc *sch, struct sk_buff *skb)
 	}
 
 	qopt.defcls = q->defcls;
-	NLA_PUT(skb, TCA_OPTIONS, sizeof(qopt), &qopt);
+	nla_put(skb, TCA_OPTIONS, sizeof(qopt), &qopt);
 	return skb->len;
 
  nla_put_failure:

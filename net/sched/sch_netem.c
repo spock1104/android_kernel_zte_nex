@@ -832,7 +832,7 @@ static int dump_loss_model(const struct netem_sched_data *q,
 			.p23 = q->clg.a5,
 		};
 
-		NLA_PUT(skb, NETEM_LOSS_GI, sizeof(gi), &gi);
+		nla_put(skb, NETEM_LOSS_GI, sizeof(gi), &gi);
 		break;
 	}
 	case CLG_GILB_ELL: {
@@ -843,7 +843,7 @@ static int dump_loss_model(const struct netem_sched_data *q,
 			.k1 = q->clg.a4,
 		};
 
-		NLA_PUT(skb, NETEM_LOSS_GE, sizeof(ge), &ge);
+		nla_put(skb, NETEM_LOSS_GE, sizeof(ge), &ge);
 		break;
 	}
 	}
@@ -872,26 +872,26 @@ static int netem_dump(struct Qdisc *sch, struct sk_buff *skb)
 	qopt.loss = q->loss;
 	qopt.gap = q->gap;
 	qopt.duplicate = q->duplicate;
-	NLA_PUT(skb, TCA_OPTIONS, sizeof(qopt), &qopt);
+	nla_put(skb, TCA_OPTIONS, sizeof(qopt), &qopt);
 
 	cor.delay_corr = q->delay_cor.rho;
 	cor.loss_corr = q->loss_cor.rho;
 	cor.dup_corr = q->dup_cor.rho;
-	NLA_PUT(skb, TCA_NETEM_CORR, sizeof(cor), &cor);
+	nla_put(skb, TCA_NETEM_CORR, sizeof(cor), &cor);
 
 	reorder.probability = q->reorder;
 	reorder.correlation = q->reorder_cor.rho;
-	NLA_PUT(skb, TCA_NETEM_REORDER, sizeof(reorder), &reorder);
+	nla_put(skb, TCA_NETEM_REORDER, sizeof(reorder), &reorder);
 
 	corrupt.probability = q->corrupt;
 	corrupt.correlation = q->corrupt_cor.rho;
-	NLA_PUT(skb, TCA_NETEM_CORRUPT, sizeof(corrupt), &corrupt);
+	nla_put(skb, TCA_NETEM_CORRUPT, sizeof(corrupt), &corrupt);
 
 	rate.rate = q->rate;
 	rate.packet_overhead = q->packet_overhead;
 	rate.cell_size = q->cell_size;
 	rate.cell_overhead = q->cell_overhead;
-	NLA_PUT(skb, TCA_NETEM_RATE, sizeof(rate), &rate);
+	nla_put(skb, TCA_NETEM_RATE, sizeof(rate), &rate);
 
 	if (dump_loss_model(q, skb) != 0)
 		goto nla_put_failure;

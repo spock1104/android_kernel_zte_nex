@@ -757,36 +757,36 @@ static int copy_to_user_state_extra(struct xfrm_state *x,
 	copy_to_user_state(x, p);
 
 	if (x->coaddr)
-		NLA_PUT(skb, XFRMA_COADDR, sizeof(*x->coaddr), x->coaddr);
+		nla_put(skb, XFRMA_COADDR, sizeof(*x->coaddr), x->coaddr);
 
 	if (x->lastused)
-		NLA_PUT_U64(skb, XFRMA_LASTUSED, x->lastused);
+		nla_put_u64(skb, XFRMA_LASTUSED, x->lastused);
 
 	if (x->aead)
-		NLA_PUT(skb, XFRMA_ALG_AEAD, aead_len(x->aead), x->aead);
+		nla_put(skb, XFRMA_ALG_AEAD, aead_len(x->aead), x->aead);
 	if (x->aalg) {
 		if (copy_to_user_auth(x->aalg, skb))
 			goto nla_put_failure;
 
-		NLA_PUT(skb, XFRMA_ALG_AUTH_TRUNC,
+		nla_put(skb, XFRMA_ALG_AUTH_TRUNC,
 			xfrm_alg_auth_len(x->aalg), x->aalg);
 	}
 	if (x->ealg)
-		NLA_PUT(skb, XFRMA_ALG_CRYPT, xfrm_alg_len(x->ealg), x->ealg);
+		nla_put(skb, XFRMA_ALG_CRYPT, xfrm_alg_len(x->ealg), x->ealg);
 	if (x->calg)
-		NLA_PUT(skb, XFRMA_ALG_COMP, sizeof(*(x->calg)), x->calg);
+		nla_put(skb, XFRMA_ALG_COMP, sizeof(*(x->calg)), x->calg);
 
 	if (x->encap)
-		NLA_PUT(skb, XFRMA_ENCAP, sizeof(*x->encap), x->encap);
+		nla_put(skb, XFRMA_ENCAP, sizeof(*x->encap), x->encap);
 
 	if (x->tfcpad)
-		NLA_PUT_U32(skb, XFRMA_TFCPAD, x->tfcpad);
+		nla_put_u32(skb, XFRMA_TFCPAD, x->tfcpad);
 
 	if (xfrm_mark_put(skb, &x->mark))
 		goto nla_put_failure;
 
 	if (x->replay_esn)
-		NLA_PUT(skb, XFRMA_REPLAY_ESN_VAL,
+		nla_put(skb, XFRMA_REPLAY_ESN_VAL,
 			xfrm_replay_state_esn_len(x->replay_esn), x->replay_esn);
 
 	if (x->security && copy_sec_ctx(x->security, skb) < 0)
@@ -912,8 +912,8 @@ static int build_spdinfo(struct sk_buff *skb, struct net *net,
 	sph.spdhcnt = si.spdhcnt;
 	sph.spdhmcnt = si.spdhmcnt;
 
-	NLA_PUT(skb, XFRMA_SPD_INFO, sizeof(spc), &spc);
-	NLA_PUT(skb, XFRMA_SPD_HINFO, sizeof(sph), &sph);
+	nla_put(skb, XFRMA_SPD_INFO, sizeof(spc), &spc);
+	nla_put(skb, XFRMA_SPD_HINFO, sizeof(sph), &sph);
 
 	return nlmsg_end(skb, nlh);
 
@@ -967,8 +967,8 @@ static int build_sadinfo(struct sk_buff *skb, struct net *net,
 	sh.sadhmcnt = si.sadhmcnt;
 	sh.sadhcnt = si.sadhcnt;
 
-	NLA_PUT_U32(skb, XFRMA_SAD_CNT, si.sadcnt);
-	NLA_PUT(skb, XFRMA_SAD_HINFO, sizeof(sh), &sh);
+	nla_put_u32(skb, XFRMA_SAD_CNT, si.sadcnt);
+	nla_put(skb, XFRMA_SAD_HINFO, sizeof(sh), &sh);
 
 	return nlmsg_end(skb, nlh);
 
@@ -1691,19 +1691,19 @@ static int build_aevent(struct sk_buff *skb, struct xfrm_state *x, const struct 
 	id->flags = c->data.aevent;
 
 	if (x->replay_esn)
-		NLA_PUT(skb, XFRMA_REPLAY_ESN_VAL,
+		nla_put(skb, XFRMA_REPLAY_ESN_VAL,
 			xfrm_replay_state_esn_len(x->replay_esn),
 			x->replay_esn);
 	else
-		NLA_PUT(skb, XFRMA_REPLAY_VAL, sizeof(x->replay), &x->replay);
+		nla_put(skb, XFRMA_REPLAY_VAL, sizeof(x->replay), &x->replay);
 
-	NLA_PUT(skb, XFRMA_LTIME_VAL, sizeof(x->curlft), &x->curlft);
+	nla_put(skb, XFRMA_LTIME_VAL, sizeof(x->curlft), &x->curlft);
 
 	if (id->flags & XFRM_AE_RTHR)
-		NLA_PUT_U32(skb, XFRMA_REPLAY_THRESH, x->replay_maxdiff);
+		nla_put_u32(skb, XFRMA_REPLAY_THRESH, x->replay_maxdiff);
 
 	if (id->flags & XFRM_AE_ETHR)
-		NLA_PUT_U32(skb, XFRMA_ETIMER_THRESH,
+		nla_put_u32(skb, XFRMA_ETIMER_THRESH,
 			    x->replay_maxage * 10 / HZ);
 
 	if (xfrm_mark_put(skb, &x->mark))
@@ -2836,7 +2836,7 @@ static int build_report(struct sk_buff *skb, u8 proto,
 	memcpy(&ur->sel, sel, sizeof(ur->sel));
 
 	if (addr)
-		NLA_PUT(skb, XFRMA_COADDR, sizeof(*addr), addr);
+		nla_put(skb, XFRMA_COADDR, sizeof(*addr), addr);
 
 	return nlmsg_end(skb, nlh);
 

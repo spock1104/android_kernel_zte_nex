@@ -252,11 +252,11 @@ hash_netiface4_data_list(struct sk_buff *skb,
 
 	if (data->nomatch)
 		flags |= IPSET_FLAG_NOMATCH;
-	NLA_PUT_IPADDR4(skb, IPSET_ATTR_IP, data->ip);
-	NLA_PUT_U8(skb, IPSET_ATTR_CIDR, data->cidr);
-	NLA_PUT_STRING(skb, IPSET_ATTR_IFACE, data->iface);
+	nla_put_ipaddr4(skb, IPSET_ATTR_IP, data->ip);
+	nla_put_u8(skb, IPSET_ATTR_CIDR, data->cidr);
+	nla_put_string(skb, IPSET_ATTR_IFACE, data->iface);
 	if (flags)
-		NLA_PUT_NET32(skb, IPSET_ATTR_CADT_FLAGS, htonl(flags));
+		nla_put_net32(skb, IPSET_ATTR_CADT_FLAGS, htonl(flags));
 	return 0;
 
 nla_put_failure:
@@ -273,12 +273,12 @@ hash_netiface4_data_tlist(struct sk_buff *skb,
 
 	if (data->nomatch)
 		flags |= IPSET_FLAG_NOMATCH;
-	NLA_PUT_IPADDR4(skb, IPSET_ATTR_IP, data->ip);
-	NLA_PUT_U8(skb, IPSET_ATTR_CIDR, data->cidr);
-	NLA_PUT_STRING(skb, IPSET_ATTR_IFACE, data->iface);
+	nla_put_ipaddr4(skb, IPSET_ATTR_IP, data->ip);
+	nla_put_u8(skb, IPSET_ATTR_CIDR, data->cidr);
+	nla_put_string(skb, IPSET_ATTR_IFACE, data->iface);
 	if (flags)
-		NLA_PUT_NET32(skb, IPSET_ATTR_CADT_FLAGS, htonl(flags));
-	NLA_PUT_NET32(skb, IPSET_ATTR_TIMEOUT,
+		nla_put_net32(skb, IPSET_ATTR_CADT_FLAGS, htonl(flags));
+	nla_put_net32(skb, IPSET_ATTR_TIMEOUT,
 		      htonl(ip_set_timeout_get(tdata->timeout)));
 
 	return 0;
@@ -555,11 +555,11 @@ hash_netiface6_data_list(struct sk_buff *skb,
 
 	if (data->nomatch)
 		flags |= IPSET_FLAG_NOMATCH;
-	NLA_PUT_IPADDR6(skb, IPSET_ATTR_IP, &data->ip);
-	NLA_PUT_U8(skb, IPSET_ATTR_CIDR, data->cidr);
-	NLA_PUT_STRING(skb, IPSET_ATTR_IFACE, data->iface);
+	nla_put_ipaddr6(skb, IPSET_ATTR_IP, &data->ip);
+	nla_put_u8(skb, IPSET_ATTR_CIDR, data->cidr);
+	nla_put_string(skb, IPSET_ATTR_IFACE, data->iface);
 	if (flags)
-		NLA_PUT_NET32(skb, IPSET_ATTR_CADT_FLAGS, htonl(flags));
+		nla_put_net32(skb, IPSET_ATTR_CADT_FLAGS, htonl(flags));
 	return 0;
 
 nla_put_failure:
@@ -576,12 +576,12 @@ hash_netiface6_data_tlist(struct sk_buff *skb,
 
 	if (data->nomatch)
 		flags |= IPSET_FLAG_NOMATCH;
-	NLA_PUT_IPADDR6(skb, IPSET_ATTR_IP, &e->ip);
-	NLA_PUT_U8(skb, IPSET_ATTR_CIDR, data->cidr);
-	NLA_PUT_STRING(skb, IPSET_ATTR_IFACE, data->iface);
+	nla_put_ipaddr6(skb, IPSET_ATTR_IP, &e->ip);
+	nla_put_u8(skb, IPSET_ATTR_CIDR, data->cidr);
+	nla_put_string(skb, IPSET_ATTR_IFACE, data->iface);
 	if (flags)
-		NLA_PUT_NET32(skb, IPSET_ATTR_CADT_FLAGS, htonl(flags));
-	NLA_PUT_NET32(skb, IPSET_ATTR_TIMEOUT,
+		nla_put_net32(skb, IPSET_ATTR_CADT_FLAGS, htonl(flags));
+	nla_put_net32(skb, IPSET_ATTR_TIMEOUT,
 		      htonl(ip_set_timeout_get(e->timeout)));
 	return 0;
 

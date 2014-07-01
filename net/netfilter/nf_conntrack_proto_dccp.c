@@ -643,10 +643,10 @@ static int dccp_to_nlattr(struct sk_buff *skb, struct nlattr *nla,
 	nest_parms = nla_nest_start(skb, CTA_PROTOINFO_DCCP | NLA_F_NESTED);
 	if (!nest_parms)
 		goto nla_put_failure;
-	NLA_PUT_U8(skb, CTA_PROTOINFO_DCCP_STATE, ct->proto.dccp.state);
-	NLA_PUT_U8(skb, CTA_PROTOINFO_DCCP_ROLE,
+	nla_put_u8(skb, CTA_PROTOINFO_DCCP_STATE, ct->proto.dccp.state);
+	nla_put_u8(skb, CTA_PROTOINFO_DCCP_ROLE,
 		   ct->proto.dccp.role[IP_CT_DIR_ORIGINAL]);
-	NLA_PUT_BE64(skb, CTA_PROTOINFO_DCCP_HANDSHAKE_SEQ,
+	nla_put_be64(skb, CTA_PROTOINFO_DCCP_HANDSHAKE_SEQ,
 		     cpu_to_be64(ct->proto.dccp.handshake_seq));
 	nla_nest_end(skb, nest_parms);
 	spin_unlock_bh(&ct->lock);
@@ -740,7 +740,7 @@ dccp_timeout_obj_to_nlattr(struct sk_buff *skb, const void *data)
 	int i;
 
 	for (i=CTA_TIMEOUT_DCCP_UNSPEC+1; i<CTA_TIMEOUT_DCCP_MAX+1; i++)
-		NLA_PUT_BE32(skb, i, htonl(timeouts[i] / HZ));
+		nla_put_be32(skb, i, htonl(timeouts[i] / HZ));
 
 	return 0;
 
