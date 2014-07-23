@@ -425,13 +425,6 @@ static struct page *find_get_zspage(struct size_class *class)
 	return page;
 }
 
-
-/*
- * If this becomes a separate module, register zs_init() with
- * module_init(), zs_exit with module_exit(), and remove zs_initialized
-*/
-static int zs_initialized;
-
 static int zs_cpu_notifier(struct notifier_block *nb, unsigned long action,
 				void *pcpu)
 {
@@ -473,7 +466,7 @@ static void zs_exit(void)
 	unregister_cpu_notifier(&zs_cpu_nb);
 }
 
-static int zs_init(void)
+static int __init zs_init(void)
 {
 	int cpu, ret;
 
@@ -516,17 +509,6 @@ struct zs_pool *zs_create_pool(const char *name, gfp_t flags)
 		spin_lock_init(&class->lock);
 		class->zspage_order = get_zspage_order(size);
 
-	}
-
-	/*
-	 * If this becomes a separate module, register zs_init with
-	 * module_init, and remove this block
-	*/
-	if (!zs_initialized) {
-		error = zs_init();
-		if (error)
-			goto cleanup;
-		zs_initialized = 1;
 	}
 
 	pool->flags = flags;
@@ -727,7 +709,7 @@ static void local_unmap_kernel_range(unsigned long addr, unsigned long size)
 
 	flush_cache_vunmap(addr, end);
 	unmap_kernel_range_noflush(addr, size);
-	local_flush_tlb_kernel_range(addr, end);
+//	local_flush_tlb_kernel_range(addr, end);
 }
 
 void zs_unmap_object(struct zs_pool *pool, void *handle)
@@ -779,3 +761,9 @@ u64 zs_get_total_size_bytes(struct zs_pool *pool)
 	return npages << PAGE_SHIFT;
 }
 EXPORT_SYMBOL_GPL(zs_get_total_size_bytes);
+
+MODULE_AUTHOR("Nitin Gupta <ngupta at vflare.org>");
+MODULE_LICENSE("Dual BSD/GPL");
+
+module_init(zs_init);
+module_exit(zs_exit);
