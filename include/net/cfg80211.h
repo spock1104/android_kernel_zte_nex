@@ -1269,7 +1269,6 @@ struct cfg80211_ibss_params {
  * @ie: IEs for association request
  * @ie_len: Length of assoc_ie in octets
  * @privacy: indicates whether privacy-enabled APs should be used
- * @mfp: indicate whether management frame protection is used
  * @crypto: crypto settings
  * @key_len: length of WEP key for shared key authentication
  * @key_idx: index of WEP key for shared key authentication
@@ -3706,57 +3705,6 @@ void cfg80211_tdls_oper_request(struct net_device *dev, const u8 *peer,
  * return 0 if MCS index >= 32
  */
 u16 cfg80211_calculate_bitrate(struct rate_info *rate);
-/*
- * cfg80211_tdls_oper_request - request userspace to perform TDLS operation
- * @dev: the device on which the operation is requested
- * @peer: the MAC address of the peer device
- * @oper: the requested TDLS operation (NL80211_TDLS_SETUP or
- *     NL80211_TDLS_TEARDOWN)
- * @reason_code: the reason code for teardown request
- * @gfp: allocation flags
- *
- * This function is used to request userspace to perform TDLS operation that
- * requires knowledge of keys, i.e., link setup or teardown when the AP
- * connection uses encryption. This is optional mechanism for the driver to use
- * if it can automatically determine when a TDLS link could be useful (e.g.,
- * based on traffic and signal strength for a peer).
- */
-void cfg80211_tdls_oper_request(struct net_device *dev, const u8 *peer,
-                               enum nl80211_tdls_operation oper,
-                               u16 reason_code, gfp_t gfp);
-
-/**
- * struct cfg80211_ft_event - FT Information Elements
- * @ies: FT IEs
- * @ies_len: length of the FT IE in bytes
- * @target_ap: target AP's MAC address
- * @ric_ies: RIC IE
- * @ric_ies_len: length of the RIC IE in bytes
- */
-struct cfg80211_ft_event_params {
-	const u8 *ies;
-	size_t ies_len;
-	const u8 *target_ap;
-	const u8 *ric_ies;
-	size_t ric_ies_len;
-};
-
-/**
- * cfg80211_ft_event - notify userspace about FT IE and RIC IE
- * @netdev: network device
- * @ft_event: IE information
- */
-void cfg80211_ft_event(struct net_device *netdev,
-		       struct cfg80211_ft_event_params *ft_event);
-
-
-
-/**
- * cfg80211_ap_stopped - notify userspace that AP mode stopped
- * @netdev: network device
- * @gfp: context flags
- */
-void cfg80211_ap_stopped(struct net_device *netdev, gfp_t gfp);
 
 /**
  * struct cfg80211_ft_event - FT Information Elements
@@ -3838,4 +3786,5 @@ void cfg80211_ap_stopped(struct net_device *netdev, gfp_t gfp);
 	WARN(1, "wiphy: %s\n" format, wiphy_name(wiphy), ##args);
 
 #endif /* __NET_CFG80211_H */
+
 
