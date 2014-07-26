@@ -2462,11 +2462,19 @@ source "drivers/staging/zram/Kconfig"
 source "drivers/staging/zcache/Kconfig"
 source "drivers/staging/zsmalloc/Kconfig"
 
-
 config FIX_MEMLEAK
 	bool "Fix SELinux memleak on policy load"
 	help
 	  Commit 2463c26 "SELinux: put name based create rules in a hashtable"
 	  did not check return value from hashtab_insert() in filename_trans_read().
 	  It leaks memory if hashtab_insert() returns error.
+
+config ARCH_RANDOM
+	bool "SOC specific random number generation"
+	help
+	  Allow the kernel to use an architecture specific implementation for
+	  random number generation
+	  
+	  If unsure, say N
+
 
