@@ -90,7 +90,6 @@ GTAGS
 #
 # spock1104's "special" list
 #
-scripts/Makefile.lib
 scripts/basic/fixdep
 scripts/bin2c
 scripts/conmakehash
