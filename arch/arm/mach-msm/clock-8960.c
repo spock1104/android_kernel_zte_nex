@@ -3498,6 +3498,35 @@ static struct rcg_clk gfx2d1_clk = {
 	}
 
 /*Shared by 8064, 8930, and 8960ab*/
+static struct clk_freq_tbl clk_tbl_gfx3d_oc[] = {
+	F_GFX3D(        0, gnd,   0,  0),
+	F_GFX3D( 27000000, pxo,   0,  0),
+	F_GFX3D( 48000000, pll8,  1,  8),
+	F_GFX3D( 54857000, pll8,  1,  7),
+	F_GFX3D( 64000000, pll8,  1,  6),
+	F_GFX3D( 76800000, pll8,  1,  5),
+	F_GFX3D( 96000000, pll8,  1,  4),
+	F_GFX3D(128000000, pll8,  1,  3),
+	F_GFX3D(145455000, pll2,  2, 11),
+	F_GFX3D(160000000, pll2,  1,  5),
+	F_GFX3D(177778000, pll2,  2,  9),
+	F_GFX3D(192000000, pll8,  1,  2),
+	F_GFX3D(200000000, pll2,  1,  4),
+	F_GFX3D(228571000, pll2,  2,  7),
+	F_GFX3D(266667000, pll2,  1,  3),
+	F_GFX3D(320000000, pll2,  2,  5),
+	F_GFX3D(400000000, pll2,  1,  2),
+	F_GFX3D(450000000, pll15, 1,  2),
+	F_GFX3D(533333000, pll2,  2,  3),
+	F_END
+};
+
+static unsigned long fmax_gfx3d_8930_oc[MAX_VDD_LEVELS] __initdata = {
+	[VDD_DIG_LOW]     = 192000000,
+	[VDD_DIG_NOMINAL] = 320000000,
+	[VDD_DIG_HIGH]    = 533333000
+};
+
 static struct clk_freq_tbl clk_tbl_gfx3d[] = {
 	F_GFX3D(        0, gnd,   0,  0),
 	F_GFX3D( 27000000, pxo,   0,  0),
@@ -3597,9 +3626,18 @@ static struct rcg_clk gfx3d_clk = {
 	.ns_reg = GFX3D_NS_REG,
 	.root_en_mask = BIT(2),
 	.set_rate = set_rate_mnd_banked,
+	#ifdef CONFIG_GPU_OVERCLOCK
+	.freq_tbl = clk_tbl_gfx3d_oc,
+	.c = {
+		.dbg_name = "gfx3d_clk",
+		.ops = &clk_ops_rcg,
+		VDD_DIG_FMAX_MAP3(LOW,  128000000, NOMINAL, 300000000,
+				  HIGH, 533000000),
+		CLK_INIT(gfx3d_clk.c),
+		.depends = &gmem_axi_clk.c,
+	},
+	#else
 	.freq_tbl = clk_tbl_gfx3d,
-	.bank_info = &bmnd_info_gfx3d,
-	.current_freq = &rcg_dummy_freq,
 	.c = {
 		.dbg_name = "gfx3d_clk",
 		.ops = &clk_ops_rcg,
@@ -3608,6 +3646,9 @@ static struct rcg_clk gfx3d_clk = {
 		CLK_INIT(gfx3d_clk.c),
 		.depends = &gmem_axi_clk.c,
 	},
+	#endif	
+	.bank_info = &bmnd_info_gfx3d,
+	.current_freq = &rcg_dummy_freq,
 };
 
 #define F_VCAP(f, s, m, n) \
@@ -6575,8 +6616,13 @@ static void __init msm8960_clock_pre_init(void)
 	 * clocks which differ between 8960 and 8930.
 	 */
 	if (cpu_is_msm8930() || cpu_is_msm8627()) {
+		#ifdef CONFIG_GPU_OC
+		memcpy(gfx3d_clk.c.fmax, fmax_gfx3d_8930_oc,
+		       sizeof(gfx3d_clk.c.fmax));
+		#else
 		memcpy(gfx3d_clk.c.fmax, fmax_gfx3d_8930,
 		       sizeof(gfx3d_clk.c.fmax));
+		#endif
 	} else if (cpu_is_msm8930aa()) {
 		memcpy(gfx3d_clk.c.fmax, fmax_gfx3d_8930aa,
 		       sizeof(gfx3d_clk.c.fmax));
