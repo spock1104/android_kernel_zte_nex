@@ -15,7 +15,6 @@
 #include <linux/module.h>
 #include <linux/mempool.h>
 #include <linux/mutex.h>
-#include <linux/ratelimit.h>
 #include <asm/atomic.h>
 #include "diagchar.h"
 
@@ -164,17 +163,14 @@ void diagmem_free(struct diagchar_dev *driver, void *buf, int pool_type)
 			mempool_free(buf, driver->diag_hsic_pool);
 			atomic_add(-1, (atomic_t *)&driver->count_hsic_pool);
 		} else
-			pr_err_ratelimited("diag: Attempt to free up DIAG driver HSIC mempool which is already free %d, ch = %d",
-				diag_hsic[index].count_hsic_pool, index);
-	} else if (pool_type == POOL_TYPE_HSIC_WRITE ||
-				pool_type == POOL_TYPE_HSIC_2_WRITE) {
-		index = pool_type - POOL_TYPE_HSIC_WRITE;
-		if (diag_hsic[index].diag_hsic_write_pool != NULL &&
-			diag_hsic[index].count_hsic_write_pool > 0) {
-			mempool_free(buf,
-					diag_hsic[index].diag_hsic_write_pool);
-			atomic_add(-1, (atomic_t *)
-				&diag_hsic[index].count_hsic_write_pool);
+			pr_err("diag: Attempt to free up DIAG driver HSIC mempool which is already free %d ",
+				driver->count_hsic_pool);
+	} else if (pool_type == POOL_TYPE_HSIC_WRITE) {
+		if (driver->diag_hsic_write_pool != NULL &&
+			driver->count_hsic_write_pool > 0) {
+			mempool_free(buf, driver->diag_hsic_write_pool);
+			atomic_add(-1,
+				(atomic_t *)&driver->count_hsic_write_pool);
 		} else
 			pr_err("diag: Attempt to free up DIAG driver HSIC USB structure mempool which is already free %d ",
 				driver->count_write_struct_pool);
