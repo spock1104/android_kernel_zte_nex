@@ -740,10 +740,7 @@ static int _snd_pcm_new(struct snd_card *card, const char *id, int device,
 	}
 	pcm->card = card;
 	pcm->device = device;
-<<<<<<< HEAD
-=======
 	pcm->internal = internal;
->>>>>>> 4d5c8c4... Patch 3.4.60 --> 3.4.70 using patch -p1 <
 
 	if (id)
 		strlcpy(pcm->id, id, sizeof(pcm->id));
@@ -766,6 +763,28 @@ static int _snd_pcm_new(struct snd_card *card, const char *id, int device,
 	return 0;
 }
 
+/**
+ * snd_pcm_new - create a new PCM instance
+ * @card: the card instance
+ * @id: the id string
+ * @device: the device index (zero based)
+ * @playback_count: the number of substreams for playback
+ * @capture_count: the number of substreams for capture
+ * @rpcm: the pointer to store the new pcm instance
+ *
+ * Creates a new PCM instance.
+ *
+ * The pcm operators have to be set afterwards to the new instance
+ * via snd_pcm_set_ops().
+ *
+ * Returns zero if successful, or a negative error code on failure.
+ */
+int snd_pcm_new(struct snd_card *card, const char *id, int device,
+		int playback_count, int capture_count, struct snd_pcm **rpcm)
+{
+	return _snd_pcm_new(card, id, device, playback_count, capture_count,
+			false, rpcm);
+}
 EXPORT_SYMBOL(snd_pcm_new);
 
 static int snd_pcm_new_stream_soc_be(struct snd_pcm *pcm, int stream,

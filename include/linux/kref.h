@@ -93,25 +93,6 @@ static inline int kref_put(struct kref *kref, void (*release)(struct kref *kref)
 {
 	return kref_sub(kref, 1, release);
 }
-<<<<<<< HEAD
-=======
-
-static inline int kref_put_mutex(struct kref *kref,
-				 void (*release)(struct kref *kref),
-				 struct mutex *lock)
-{
-	WARN_ON(release == NULL);
-        if (unlikely(!atomic_add_unless(&kref->refcount, -1, 1))) {
-		mutex_lock(lock);
-		if (unlikely(!atomic_dec_and_test(&kref->refcount))) {
-			mutex_unlock(lock);
-			return 0;
-		}
-		release(kref);
-		return 1;
-	}
-	return 0;
-}
 
 /**
  * kref_get_unless_zero - Increment refcount for object unless it is zero.
@@ -133,5 +114,5 @@ static inline int __must_check kref_get_unless_zero(struct kref *kref)
 {
 	return atomic_add_unless(&kref->refcount, 1, 0);
 }
->>>>>>> f0f4ee4... Patch 3.4.40 --> 3.4.50 using patch -p1 <
 #endif /* _KREF_H_ */
+
