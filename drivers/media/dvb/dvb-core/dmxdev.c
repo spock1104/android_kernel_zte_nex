@@ -1430,7 +1430,7 @@ static int dvb_dmxdev_section_callback(const u8 *buffer1, size_t buffer1_len,
 		ret = dvb_dmxdev_buffer_write(&dmxdevfilter->buffer, buffer2,
 					      buffer2_len);
 
-	if (ret < 0) {
+	if (ret < 0)
 		dmxdevfilter->flush_data_len =
 			dvb_ringbuffer_avail(&dmxdevfilter->buffer);
 		dvb_dmxdev_flush_output(&dmxdevfilter->buffer,
@@ -1450,7 +1450,6 @@ static int dvb_dmxdev_section_callback(const u8 *buffer1, size_t buffer1_len,
 					DMX_FILTER_CC_ERROR;
 		else
 			event.params.section.flags = 0;
-	}
 
 	dvb_dmxdev_add_event(&dmxdevfilter->events, &event);
 
@@ -1534,8 +1533,7 @@ static int dvb_dmxdev_ts_callback(const u8 *buffer1, size_t buffer1_len,
 	if (buffer1_len + buffer2_len) {
 		ret = dvb_dmxdev_buffer_write(buffer, buffer1, buffer1_len);
 		if (ret == buffer1_len)
-			ret = dvb_dmxdev_buffer_write(buffer, buffer2,
-								buffer2_len);
+			ret = dvb_dmxdev_buffer_write(buffer, buffer2,buffer2_len);
 		if (ret < 0) {
 			*flush_data_len =
 				dvb_ringbuffer_avail(&dmxdevfilter->buffer);
