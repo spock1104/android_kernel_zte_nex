@@ -4074,12 +4074,20 @@ done:
 	return err;
 }
 
+static inline int l2cap_command_rej(struct l2cap_conn *conn,
+				    struct l2cap_cmd_hdr *cmd, u16 cmd_len,
+				    u8 *data)
 
-static inline int l2cap_command_rej(struct l2cap_conn *conn, struct l2cap_cmd_hdr *cmd, u8 *data)
+
 {
 	struct l2cap_cmd_rej *rej = (struct l2cap_cmd_rej *) data;
 
+	if (cmd_len < sizeof(*rej))
+		return -EPROTO;
+
 	if (rej->reason != 0x0000)
+		return 0;		
+	if (rej->reason != L2CAP_REJ_NOT_UNDERSTOOD)
 		return 0;
 
 	if ((conn->info_state & L2CAP_INFO_FEAT_MASK_REQ_SENT) &&
@@ -4106,8 +4114,14 @@ static struct sock *l2cap_create_connect(struct l2cap_conn *conn,
 	struct sock *parent, *sk = NULL;
 	int result, status = L2CAP_CS_NO_INFO;
 
-	u16 dcid = 0, scid = __le16_to_cpu(req->scid);
-	__le16 psm = req->psm;
+	u16 dcid = 0, scid;
+	__le16 psm;
+
+	if (cmd_len < sizeof(struct l2cap_conn_req))
+		return -EPROTO;
+
+	scid = __le16_to_cpu(req->scid);
+	psm = req->psm;
 
 	BT_DBG("psm 0x%2.2x scid 0x%4.4x", psm, scid);
 
@@ -4245,12 +4259,17 @@ static inline int l2cap_connect_req(struct l2cap_conn *conn,
 	return 0;
 }
 
-static inline int l2cap_connect_rsp(struct l2cap_conn *conn, struct l2cap_cmd_hdr *cmd, u8 *data)
+static int l2cap_connect_rsp(struct l2cap_conn *conn,
+			      struct l2cap_cmd_hdr *cmd, u16 cmd_len,
+			      u8 *data)
 {
 	struct l2cap_conn_rsp *rsp = (struct l2cap_conn_rsp *) data;
 	u16 scid, dcid, result, status;
 	struct sock *sk;
 	u8 req[128];
+
+	if (cmd_len < sizeof(*rsp))
+		return -EPROTO;
 
 	scid   = __le16_to_cpu(rsp->scid);
 	dcid   = __le16_to_cpu(rsp->dcid);
@@ -4327,6 +4346,9 @@ static inline int l2cap_config_req(struct l2cap_conn *conn, struct l2cap_cmd_hdr
 	struct sock *sk;
 	int len;
 	u8 amp_move_reconf = 0;
+
+	if (cmd_len < sizeof(*req))
+		return -EPROTO;
 
 	dcid  = __le16_to_cpu(req->dcid);
 	flags = __le16_to_cpu(req->flags);
@@ -4446,13 +4468,17 @@ unlock:
 	return 0;
 }
 
-static inline int l2cap_config_rsp(struct l2cap_conn *conn, struct l2cap_cmd_hdr *cmd, u8 *data)
+static inline int l2cap_config_rsp(struct l2cap_conn *conn,
+				   struct l2cap_cmd_hdr *cmd, u16 cmd_len,
+				   u8 *data)
 {
 	struct l2cap_conf_rsp *rsp = (struct l2cap_conf_rsp *)data;
 	u16 scid, flags, result;
 	struct sock *sk;
 	struct l2cap_pinfo *pi;
-	int len = cmd->len - sizeof(*rsp);
+
+	if (cmd_len < sizeof(*rsp))
+		return -EPROTO;
 
 	scid   = __le16_to_cpu(rsp->scid);
 	flags  = __le16_to_cpu(rsp->flags);
@@ -4572,12 +4598,17 @@ done:
 	return 0;
 }
 
-static inline int l2cap_disconnect_req(struct l2cap_conn *conn, struct l2cap_cmd_hdr *cmd, u8 *data)
+static inline int l2cap_disconnect_req(struct l2cap_conn *conn,
+				       struct l2cap_cmd_hdr *cmd, u16 cmd_len,
+				       u8 *data)
 {
 	struct l2cap_disconn_req *req = (struct l2cap_disconn_req *) data;
 	struct l2cap_disconn_rsp rsp;
 	u16 dcid, scid;
 	struct sock *sk;
+
+	if (cmd_len != sizeof(*req))
+		return -EPROTO;
 
 	scid = __le16_to_cpu(req->scid);
 	dcid = __le16_to_cpu(req->dcid);
@@ -4625,11 +4656,16 @@ static inline int l2cap_disconnect_req(struct l2cap_conn *conn, struct l2cap_cmd
 	return 0;
 }
 
-static inline int l2cap_disconnect_rsp(struct l2cap_conn *conn, struct l2cap_cmd_hdr *cmd, u8 *data)
+static inline int l2cap_disconnect_rsp(struct l2cap_conn *conn,
+				       struct l2cap_cmd_hdr *cmd, u16 cmd_len,
+				       u8 *data)
 {
 	struct l2cap_disconn_rsp *rsp = (struct l2cap_disconn_rsp *) data;
 	u16 dcid, scid;
 	struct sock *sk;
+
+	if (cmd_len != sizeof(*rsp))
+		return -EPROTO;
 
 	scid = __le16_to_cpu(rsp->scid);
 	dcid = __le16_to_cpu(rsp->dcid);
@@ -4656,10 +4692,15 @@ static inline int l2cap_disconnect_rsp(struct l2cap_conn *conn, struct l2cap_cmd
 	return 0;
 }
 
-static inline int l2cap_information_req(struct l2cap_conn *conn, struct l2cap_cmd_hdr *cmd, u8 *data)
+static inline int l2cap_information_req(struct l2cap_conn *conn,
+					struct l2cap_cmd_hdr *cmd, u16 cmd_len,
+					u8 *data)
 {
 	struct l2cap_info_req *req = (struct l2cap_info_req *) data;
 	u16 type;
+
+	if (cmd_len != sizeof(*req))
+		return -EPROTO;
 
 	type = __le16_to_cpu(req->type);
 
@@ -4700,10 +4741,15 @@ static inline int l2cap_information_req(struct l2cap_conn *conn, struct l2cap_cm
 	return 0;
 }
 
-static inline int l2cap_information_rsp(struct l2cap_conn *conn, struct l2cap_cmd_hdr *cmd, u8 *data)
+static inline int l2cap_information_rsp(struct l2cap_conn *conn,
+					struct l2cap_cmd_hdr *cmd, u16 cmd_len,
+					u8 *data)
 {
 	struct l2cap_info_rsp *rsp = (struct l2cap_info_rsp *) data;
 	u16 type, result;
+
+	if (cmd_len != sizeof(*rsp))
+		return -EPROTO;
 
 	type   = __le16_to_cpu(rsp->type);
 	result = __le16_to_cpu(rsp->result);
@@ -4772,6 +4818,16 @@ static void l2cap_send_move_chan_req(struct l2cap_conn *conn,
 
 	l2cap_send_cmd(conn, ident, L2CAP_MOVE_CHAN_REQ, sizeof(req), &req);
 }
+
+static inline int l2cap_create_channel_rsp(struct l2cap_conn *conn,
+					struct l2cap_cmd_hdr *cmd, u16 cmd_len,
+					void *data)
+{
+	BT_DBG("conn %p", conn);
+
+	return l2cap_connect_rsp(conn, cmd, cmd_len, data);
+}
+
 
 static void l2cap_send_move_chan_rsp(struct l2cap_conn *conn, u8 ident,
 				u16 icid, u16 result)
@@ -5191,6 +5247,10 @@ static inline int l2cap_move_channel_confirm_rsp(struct l2cap_conn *conn,
 	struct l2cap_pinfo *pi;
 
 	u16 icid;
+	
+	if (cmd_len < sizeof(*rsp))
+	return -EPROTO;
+
 
 	icid = le16_to_cpu(rsp->icid);
 
@@ -5758,15 +5818,15 @@ static inline int l2cap_bredr_sig_cmd(struct l2cap_conn *conn,
 
 	switch (cmd->code) {
 	case L2CAP_COMMAND_REJ:
-		l2cap_command_rej(conn, cmd, data);
+		l2cap_command_rej(conn, cmd, cmd_len, data);
 		break;
 
 	case L2CAP_CONN_REQ:
-		err = l2cap_connect_req(conn, cmd, data);
+		err = l2cap_connect_req(conn, cmd, cmd_len, data);
 		break;
 
 	case L2CAP_CONN_RSP:
-		err = l2cap_connect_rsp(conn, cmd, data);
+		err = l2cap_connect_rsp(conn, cmd, cmd_len, data);
 		break;
 
 	case L2CAP_CONF_REQ:
@@ -5774,15 +5834,15 @@ static inline int l2cap_bredr_sig_cmd(struct l2cap_conn *conn,
 		break;
 
 	case L2CAP_CONF_RSP:
-		err = l2cap_config_rsp(conn, cmd, data);
+		err = l2cap_config_rsp(conn, cmd, cmd_len, data);
 		break;
 
 	case L2CAP_DISCONN_REQ:
-		err = l2cap_disconnect_req(conn, cmd, data);
+		err = l2cap_disconnect_req(conn, cmd, cmd_len, data);
 		break;
 
 	case L2CAP_DISCONN_RSP:
-		err = l2cap_disconnect_rsp(conn, cmd, data);
+		err = l2cap_disconnect_rsp(conn, cmd, cmd_len, data);
 		break;
 
 	case L2CAP_ECHO_REQ:
@@ -5793,11 +5853,11 @@ static inline int l2cap_bredr_sig_cmd(struct l2cap_conn *conn,
 		break;
 
 	case L2CAP_INFO_REQ:
-		err = l2cap_information_req(conn, cmd, data);
+		err = l2cap_information_req(conn, cmd, cmd_len, data);
 		break;
 
 	case L2CAP_INFO_RSP:
-		err = l2cap_information_rsp(conn, cmd, data);
+		err = l2cap_information_rsp(conn, cmd, cmd_len, data);
 		break;
 
 	case L2CAP_CREATE_CHAN_REQ:
@@ -5805,7 +5865,7 @@ static inline int l2cap_bredr_sig_cmd(struct l2cap_conn *conn,
 		break;
 
 	case L2CAP_CREATE_CHAN_RSP:
-		err = l2cap_create_channel_rsp(conn, cmd, data);
+		err = l2cap_create_channel_rsp(conn, cmd, cmd_len, data);
 		break;
 
 	case L2CAP_MOVE_CHAN_REQ:
