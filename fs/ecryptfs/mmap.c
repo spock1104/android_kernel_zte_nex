@@ -66,61 +66,6 @@ static int ecryptfs_writepage(struct page *page, struct writeback_control *wbc)
 {
 	int rc;
 
-	/*
-	 * Refuse to write the page out if we are called from reclaim context
-	 * since our writepage() path may potentially allocate memory when
-	 * calling into the lower fs vfs_write() which may in turn invoke
-	 * us again.
-	 */
-	if (current->flags & PF_MEMALLOC) {
-		redirty_page_for_writepage(wbc, page);
-		rc = 0;
-		goto out;
-	}
-
-#if 1 // FEATURE_SDCARD_ENCRYPTION
-	if (!crypt_stat || !(crypt_stat->flags & ECRYPTFS_ENCRYPTED)) {
-		ecryptfs_printk(KERN_DEBUG,
-				"Passing through unencrypted page\n");
-		rc = ecryptfs_write_lower_page_segment(ecryptfs_inode, page,
-			0, PAGE_CACHE_SIZE);
-		if (rc) {
-			ClearPageUptodate(page);
-			goto out;
-		}
-		SetPageUptodate(page);
-	} else {
-#ifndef CONFIG_CRYPTO_DEV_KFIPS
-	rc = ecryptfs_encrypt_page(page);
-	if (rc) {
-		ecryptfs_printk(KERN_WARNING, "Error encrypting "
-				"page (upper index [0x%.16lx])\n", page->index);
-		ClearPageUptodate(page);
-#else
-//	rc = ecryptfs_encrypt_page(page);
-//	if (rc) {
-//		ecryptfs_printk(KERN_WARNING, "Error encrypting "
-//				"page (upper index [0x%.16lx])\n", page->index);
-//		ClearPageUptodate(page);
-	page_crypt_req = ecryptfs_alloc_page_crypt_req(
-				page, ecryptfs_writepage_complete);
-	if (unlikely(!page_crypt_req)) {
-		rc = -ENOMEM;
-		ecryptfs_printk(KERN_ERR,
-				"Failed to allocate page crypt request "
-				"for encryption\n");
-#endif
-		goto out;
-	}
-#ifndef CONFIG_CRYPTO_DEV_KFIPS
-	SetPageUptodate(page);
-#else
-//	SetPageUptodate(page);
-	set_page_writeback(page);
-	ecryptfs_encrypt_page_async(page_crypt_req);
-#endif
-	}
-#else
 	rc = ecryptfs_encrypt_page(page);
 	if (rc) {
 		ecryptfs_printk(KERN_WARNING, "Error encrypting "
@@ -606,3 +551,4 @@ const struct address_space_operations ecryptfs_aops = {
 	.write_end = ecryptfs_write_end,
 	.bmap = ecryptfs_bmap,
 };
+
