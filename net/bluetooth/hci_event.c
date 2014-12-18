@@ -3114,6 +3114,9 @@ static inline void hci_user_ssp_confirmation_evt(struct hci_dev *hdev,
 		else
 			mgmt_user_confirm_request(hdev->id, event,
 						&ev->bdaddr, ev->passkey);
+		 */
+		if (!test_bit(HCI_CONN_AUTH_PEND, &conn->flags) &&
+		    (loc_mitm || rem_mitm)) {
 	}
 
 	hci_dev_unlock(hdev);
