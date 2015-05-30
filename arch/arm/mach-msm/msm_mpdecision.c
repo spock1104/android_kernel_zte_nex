@@ -96,8 +96,8 @@ static struct msm_mpdec_tuners {
 #endif
 };
 
-static unsigned int NwNs_Threshold[8] = {12, 0, 0, 18};
-static unsigned int TwTs_Threshold[8] = {140, 0, 0, 190};
+static unsigned int NwNs_Threshold[4] = {35, 0, 0, 18};
+static unsigned int TwTs_Threshold[4] = {140, 0, 0, 190};
 
 extern unsigned int get_rq_info(void);
 extern unsigned long acpuclk_get_rate(int);
@@ -1198,4 +1198,5 @@ void msm_mpdec_exit(void) {
 #endif
 	destroy_workqueue(msm_mpdec_workq);
 }
+
 
