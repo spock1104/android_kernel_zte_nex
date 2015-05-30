@@ -1385,7 +1385,8 @@ static struct snd_soc_dai_link msm8930_dai[] = {
 		.ignore_pmdown_time = 1,
 		.be_id = MSM_FRONTEND_DAI_MULTIMEDIA5,
 	},
-	{
+//spock1104: this breaks sound on the n800
+/*	{
 		.name = "MSM8960 FM",
 		.stream_name = "MultiMedia6",
 		.cpu_dai_name	= "MultiMedia6",
@@ -1396,11 +1397,11 @@ static struct snd_soc_dai_link msm8930_dai[] = {
 		.trigger = {SND_SOC_DPCM_TRIGGER_POST,
 				SND_SOC_DPCM_TRIGGER_POST},
 		.ignore_suspend = 1,
-		.no_host_mode = SND_SOC_DAI_LINK_NO_HOST,
+		.no_host_mode = SND_SOC_DAI_LINK_NO_HOST,*/
 		/* this dainlink has playback support */
-		.ignore_pmdown_time = 1,
+/*		.ignore_pmdown_time = 1,
 		.be_id = MSM_FRONTEND_DAI_MULTIMEDIA6,
-	},
+	},*/
 	/* Backend DAI Links */
 	{
 		.name = LPASS_BE_SLIMBUS_0_RX,
