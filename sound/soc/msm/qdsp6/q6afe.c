@@ -1871,25 +1871,14 @@ static int __init afe_init(void)
 	atomic_set(&this_afe.status, 0);
 	this_afe.apr = NULL;
 #ifdef CONFIG_DEBUG_FS
-//ZTE, begin
-#if 0
 	debugfs_afelb = debugfs_create_file("afe_loopback",
-	S_IFREG | S_IWUGO, NULL, (void *) "afe_loopback",
+	0220, NULL, (void *) "afe_loopback",
 	&afe_debug_fops);
 
 	debugfs_afelb_gain = debugfs_create_file("afe_loopback_gain",
-	S_IFREG | S_IWUGO, NULL, (void *) "afe_loopback_gain",
-	&afe_debug_fops);
-#else
-	debugfs_afelb = debugfs_create_file("afe_loopback",
-	S_IFREG | 00220, NULL, (void *) "afe_loopback",
+	0220, NULL, (void *) "afe_loopback_gain",
 	&afe_debug_fops);
 
-	debugfs_afelb_gain = debugfs_create_file("afe_loopback_gain",
-	S_IFREG | 00220, NULL, (void *) "afe_loopback_gain",
-	&afe_debug_fops);
-#endif
-//ZTE, end
 
 #endif
 	return 0;

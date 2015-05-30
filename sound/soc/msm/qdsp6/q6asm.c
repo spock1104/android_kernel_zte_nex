@@ -4033,31 +4033,15 @@ static int __init q6asm_init(void)
 	memset(session, 0, sizeof(session));
 #ifdef CONFIG_DEBUG_FS
 	out_buffer = kmalloc(OUT_BUFFER_SIZE, GFP_KERNEL);
-//ZTE, begin
-#if 0
 	out_dentry = debugfs_create_file("audio_out_latency_measurement_node",\
-				S_IFREG | S_IRUGO | S_IWUGO,\
+				0664,\
 				NULL, NULL, &audio_output_latency_debug_fops);
-#else
-	out_dentry = debugfs_create_file("audio_out_latency_measurement_node",\
-				S_IFREG | 00664,\
-				NULL, NULL, &audio_output_latency_debug_fops);
-#endif
-//ZTE, end
 	if (IS_ERR(out_dentry))
 		pr_err("debugfs_create_file failed\n");
 	in_buffer = kmalloc(IN_BUFFER_SIZE, GFP_KERNEL);
-//ZTE, begin
-#if 0
 	in_dentry = debugfs_create_file("audio_in_latency_measurement_node",\
-				S_IFREG | S_IRUGO | S_IWUGO,\
+				0664,\
 				NULL, NULL, &audio_input_latency_debug_fops);
-#else
-	in_dentry = debugfs_create_file("audio_in_latency_measurement_node",\
-				S_IFREG | 00664,\
-				NULL, NULL, &audio_input_latency_debug_fops);
-#endif
-//ZTE, end
 	if (IS_ERR(in_dentry))
 		pr_err("debugfs_create_file failed\n");
 #endif

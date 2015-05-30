@@ -1846,9 +1846,6 @@ static int voice_send_cvp_register_cal_cmd(struct voice_data *v)
 			cal_block.cal_size);
 	} else {
 		cal_paddr = cal_block.cal_paddr;
-		#if defined(CONFIG_MACH_HERA)
-		pr_err("%s: cal_paddr : %0x , cal_block.cal_size: %0x",  __func__,cal_paddr,cal_block.cal_size );
-		#endif
 	}
 
 	cvp_handle = voice_get_cvp_handle(v);
@@ -1989,9 +1986,6 @@ static int voice_send_cvp_register_vol_cal_table_cmd(struct voice_data *v)
 			(void *)vol_block.cal_kvaddr, vol_block.cal_size);
 	} else {
 		cal_paddr = vol_block.cal_paddr;
-		#if defined(CONFIG_MACH_HERA)
-		pr_err("%s: cal_paddr : %0x , vol_block.cal_size: %0x",  __func__,cal_paddr,vol_block.cal_size );
-		#endif
 	}
 
 	cvp_handle = voice_get_cvp_handle(v);
